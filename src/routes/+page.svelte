@@ -4,6 +4,7 @@
 	let username: string = '';
 	let password: string = '';
 	let company: string = '';
+	let selectedCompany: string = '';
 	let companies: string[] = [
 		'Entebus',
 		'Acme Transport',
@@ -25,12 +26,15 @@
 	function onCompanyInput(e: Event) {
 		const val = (e.target as HTMLInputElement).value;
 		company = val;
+		// typing clears explicit selection until user picks from list
+		selectedCompany = '';
 		filteredCompanies = companies.filter((c) => c.toLowerCase().includes(val.toLowerCase()));
 		showCompanyList = true;
 	}
 
 	function selectCompany(c: string) {
 		company = c;
+		selectedCompany = c;
 		showCompanyList = false;
 	}
 
@@ -41,6 +45,12 @@
 
 	function onCompanyBlur() {
 		setTimeout(() => (showCompanyList = false), 150);
+	}
+
+	function toggleCompanyList() {
+		showCompanyList = !showCompanyList;
+		if (showCompanyList) filteredCompanies = companies;
+		setTimeout(() => (document.getElementById('companyName') as HTMLInputElement)?.focus(), 0);
 	}
 
 	//-- Login handler (mock) --
@@ -60,29 +70,47 @@
 			<h3 class="mt-2 fw-inter-700">Operator Sign In</h3>
 			<h6 class="text-secondary fw-inter-400">Access your company dashboard</h6>
 		</div>
+		{#if selectedCompany}
+			<div class="selected-company mb-3 text-center">
+				<span class="badge selected-badge">{selectedCompany}</span>
+			</div>
+		{/if}
 		<form on:submit|preventDefault={handleLogin}>
 			<!-- company field -->
 			<div class="mb-3" style="position: relative;">
 				<label for="companyName" class="form-label">Company</label>
-				<input
-					id="companyName"
-					class="form-control form-control-lg"
-					placeholder="Search company"
-					bind:value={company}
-					on:input={onCompanyInput}
-					on:focus={onCompanyFocus}
-					on:blur={onCompanyBlur}
-					autocomplete="off"
-					required
-				/>
+				<div class="input-group">
+					<input
+						id="companyName"
+						class="form-control form-control-lg"
+						placeholder="Search company"
+						bind:value={company}
+						on:input={onCompanyInput}
+						on:focus={onCompanyFocus}
+						on:blur={onCompanyBlur}
+						autocomplete="off"
+						required
+					/>
+					<span
+						class="input-group-text company-toggle"
+						role="button"
+						tabindex="0"
+						on:mousedown|preventDefault={toggleCompanyList}
+						aria-expanded={showCompanyList}
+						aria-label="Toggle company list"
+					>
+						<i class={`bi ${showCompanyList ? 'bi-chevron-up' : 'bi-chevron-down'}`}></i>
+					</span>
+				</div>
 				{#if showCompanyList && filteredCompanies.length}
-					<ul class="company-list position-absolute w-100 shadow-sm">
+					<ul class="company-list position-absolute w-100 shadow-sm" role="listbox">
 						{#each filteredCompanies as comp}
 							<li
 								tabindex="0"
 								role="option"
-								aria-selected="false"
+								aria-selected={comp === selectedCompany}
 								class="company-item"
+								class:selected={comp === selectedCompany}
 								on:mousedown={() => selectCompany(comp)}
 							>
 								{comp}
@@ -190,5 +218,34 @@
 
 	.company-item:hover {
 		background: #f8f9fa;
+	}
+
+	.company-item.selected {
+		background: #e9f7ff;
+		font-weight: 600;
+		color: #0b63a3;
+	}
+
+	.selected-company .selected-badge {
+		background: linear-gradient(90deg, #2033b1 0%, #47c7ff 50%);
+		color: #fff;
+		padding: 0.5rem 0.9rem;
+		border-radius: 999px;
+		font-weight: 600;
+	}
+
+	.company-toggle {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 3rem;
+		background: #ffffff;
+		border-left: 1px solid rgba(0, 0, 0, 0.06);
+		cursor: pointer;
+	}
+
+	.company-toggle i {
+		color: #6c757d;
+		font-size: 1rem;
 	}
 </style>
