@@ -86,7 +86,7 @@
 					<input
 						id="companyName"
 						class="form-control form-control-lg"
-						placeholder="Search company"
+						placeholder="search company"
 						bind:value={company}
 						on:input={onCompanyInput}
 						on:focus={onCompanyFocus}
