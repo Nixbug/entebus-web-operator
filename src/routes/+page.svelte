@@ -18,6 +18,7 @@
 	let filteredCompanies = companies;
 	let showPassword: boolean = false;
 
+  //-- Password visibility toggle handler --
 	function togglePassword() {
 		showPassword = !showPassword;
 	}
@@ -39,7 +40,11 @@
 	}
 
 	function onCompanyFocus() {
-		filteredCompanies = companies;
+		if (selectedCompany && company === selectedCompany) {
+			filteredCompanies = [selectedCompany];
+		} else {
+			filteredCompanies = companies;
+		}
 		showCompanyList = true;
 	}
 
@@ -49,7 +54,10 @@
 
 	function toggleCompanyList() {
 		showCompanyList = !showCompanyList;
-		if (showCompanyList) filteredCompanies = companies;
+		if (showCompanyList) {
+			filteredCompanies =
+				selectedCompany && company === selectedCompany ? [selectedCompany] : companies;
+		}
 		setTimeout(() => (document.getElementById('companyName') as HTMLInputElement)?.focus(), 0);
 	}
 
@@ -70,11 +78,6 @@
 			<h3 class="mt-2 fw-inter-700">Operator Sign In</h3>
 			<h6 class="text-secondary fw-inter-400">Access your company dashboard</h6>
 		</div>
-		{#if selectedCompany}
-			<div class="selected-company mb-3 text-center">
-				<span class="badge selected-badge">{selectedCompany}</span>
-			</div>
-		{/if}
 		<form on:submit|preventDefault={handleLogin}>
 			<!-- company field -->
 			<div class="mb-3" style="position: relative;">
@@ -225,15 +228,6 @@
 		font-weight: 600;
 		color: #0b63a3;
 	}
-
-	.selected-company .selected-badge {
-		background: linear-gradient(90deg, #2033b1 0%, #47c7ff 50%);
-		color: #fff;
-		padding: 0.5rem 0.9rem;
-		border-radius: 999px;
-		font-weight: 600;
-	}
-
 	.company-toggle {
 		display: flex;
 		align-items: center;
