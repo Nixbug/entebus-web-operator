@@ -1,11 +1,11 @@
-# 🚍 Entebus web executive
+# 🚍 Entebus web operator
 
 [![Svelte](https://img.shields.io/badge/Svelte-‡-FF3E00?logo=svelte&logoColor=white)](https://svelte.dev/)
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-5+-7952B3?logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
 [![Docker](https://img.shields.io/badge/Docker-ready-0db7ed?logo=docker)](https://www.docker.com/)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-ready-326ce5?logo=kubernetes)](https://kubernetes.io/)
 
-The **Entebus web executive** is a high-performance web application with [Svelte](https://svelte.dev/).
+The **Entebus web operator** is a high-performance web application with [Svelte](https://svelte.dev/).
 Designed for **containerized environments** (Docker + Kubernetes), it ensures scalability, resilience, and modern developer experience.
 
 ## ✨ Features
@@ -57,22 +57,22 @@ The image is tagged using the format: <branch-name>-<commit-id> (for latest imag
 bash
 # Building the docker image
 ```
-docker build -t <registry>/<namespace>/entebus-web-executive:<branch>-<commit-id> \
-             -t <registry>/<namespace>entebus-web-executive:<branch>-latest .
+docker build -t <registry>/<namespace>/entebus-web-operator:<branch>-<commit-id> \
+             -t <registry>/<namespace>entebus-web-operator:<branch>-latest .
 
 # Running the docker image
 docker run -d --name <container-name> -p <host-port>:<container-port> \
-    <registry>/<namespace>/entebus-web-executive:<branch>-latest
+    <registry>/<namespace>/entebus-web-operator:<branch>-latest
 
 # Login to remote docker repository (only needed once)
 docker login <registry>
 
 # Push the docker image to nexus repository
-docker push <registry>/<namespace>/entebus-web-executive:<branch>-latest
-docker push <registry>/<namespace>/entebus-web-executive:<branch>-<commit-id>
+docker push <registry>/<namespace>/entebus-web-operator:<branch>-latest
+docker push <registry>/<namespace>/entebus-web-operator:<branch>-<commit-id>
 
 # Pull the docker image from nexus repository
-docker pull <registry>/<namespace>/entebus-web-executive:<branch>-<commit-id>
+docker pull <registry>/<namespace>/entebus-web-operator:<branch>-<commit-id>
 ```
 
 ## 🤝 Contributing
