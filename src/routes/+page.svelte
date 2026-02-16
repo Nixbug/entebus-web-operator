@@ -1,10 +1,13 @@
 <script lang="ts">
 	import entebusLogo from '$lib/assets/entebus_logo.png';
 	import { goto } from '$app/navigation';
+	import { tick } from 'svelte';
+
 	let username: string = '';
 	let password: string = '';
 	let company: string = '';
 	let selectedCompany: string = '';
+	let companyInput: HTMLInputElement;
 	let companies: string[] = [
 		'Entebus',
 		'Acme Transport',
@@ -52,13 +55,14 @@
 		setTimeout(() => (showCompanyList = false), 150);
 	}
 
-	function toggleCompanyList() {
+	async function toggleCompanyList() {
 		showCompanyList = !showCompanyList;
 		if (showCompanyList) {
 			filteredCompanies =
 				selectedCompany && company === selectedCompany ? [selectedCompany] : companies;
 		}
-		setTimeout(() => (document.getElementById('companyName') as HTMLInputElement)?.focus(), 0);
+		await tick();
+		companyInput?.focus();
 	}
 
 	//-- Login handler (mock) --
@@ -87,6 +91,7 @@
 						id="companyName"
 						class="form-control form-control-lg"
 						placeholder="search company"
+						bind:this={companyInput}
 						bind:value={company}
 						on:input={onCompanyInput}
 						on:focus={onCompanyFocus}
@@ -94,16 +99,16 @@
 						autocomplete="off"
 						required
 					/>
-					<span
+					<button
 						class="input-group-text company-toggle"
-						role="button"
-						tabindex="0"
-						on:mousedown|preventDefault={toggleCompanyList}
+						type="button"
+						on:click={toggleCompanyList}
+						on:mousedown|preventDefault
 						aria-expanded={showCompanyList}
 						aria-label="Toggle company list"
 					>
 						<i class={`bi ${showCompanyList ? 'bi-chevron-up' : 'bi-chevron-down'}`}></i>
-					</span>
+					</button>
 				</div>
 				{#if showCompanyList && filteredCompanies.length}
 					<ul class="company-list position-absolute w-100 shadow-sm" role="listbox">
@@ -115,6 +120,13 @@
 								class="company-item"
 								class:selected={comp === selectedCompany}
 								on:mousedown={() => selectCompany(comp)}
+								on:click={() => selectCompany(comp)}
+								on:keydown={(event) => {
+									if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
+										event.preventDefault();
+										selectCompany(comp);
+									}
+								}}
 							>
 								{comp}
 							</li>
@@ -166,7 +178,7 @@
 			<!-- remember me checkbox -->
 			<div class="mb-3 form-check">
 				<input type="checkbox" class="form-check-input" id="remember-me" />
-				<label class="form-check-label text-secondary" for="rememberMe">Remember Me</label>
+				<label class="form-check-label text-secondary" for="remember-me">Remember Me</label>
 			</div>
 			<!-- login button -->
 			<button type="submit" style="color: white;" class="btn sign-in-btn mb-3 w-100 fw-inter-700"
@@ -202,10 +214,10 @@
 		z-index: 1050;
 		border-radius: 0.5rem;
 		background: #ffffff;
-		border: 1px solid rgba(0, 0, 0, 0.08);
+		border: 1px solid rgba(0, 0, 0, 0.18);
 		box-shadow: 0 6px 20px rgba(15, 23, 42, 0.08);
 		margin: 0;
-		padding: 0.25rem 0;
+		padding: 1rem 0;
 	}
 
 	.company-item {
@@ -216,7 +228,7 @@
 	}
 
 	.company-item + .company-item {
-		border-top: 1px solid rgba(0, 0, 0, 0.04);
+		border-top: 1px solid rgba(0, 0, 0, 0.06);
 	}
 
 	.company-item:hover {

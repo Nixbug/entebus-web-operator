@@ -9,26 +9,26 @@ The **Entebus web operator** is a high-performance web application with [Svelte]
 Designed for **containerized environments** (Docker + Kubernetes), it ensures scalability, resilience, and modern developer experience.
 
 ## ✨ Features
+
 ⚡ **High-performance** with Svelte  
 🅱️ **Bootstrap support** for additional styles  
 🐳 Ready-to-use **Docker image** with CI-friendly tags  
-☸️ Deployment ready for **Kubernetes**  
+☸️ Deployment ready for **Kubernetes**
 
 ## 🛠️ Getting Started
 
 ### Prerequisites
 
-- Node.js (v18+)  
-- npm (v9+)  
-- Docker   
-- Kubernetes (optional for deployment)  
-
+- Node.js (v18+)
+- npm (v9+)
+- Docker
+- Kubernetes (optional for deployment)
 
 ### VS Code (plugins)
 
 Svelte for VS Code  
-Prettier    
-ESLint  
+Prettier  
+ESLint
 
 ### Usage
 
@@ -55,10 +55,12 @@ npm run preview
 Build, run, and push the image:
 The image is tagged using the format: <branch-name>-<commit-id> (for latest image you may add optional tag <branch-name>-latest).
 bash
+
 # Building the docker image
+
 ```
 docker build -t <registry>/<namespace>/entebus-web-operator:<branch>-<commit-id> \
-             -t <registry>/<namespace>entebus-web-operator:<branch>-latest .
+             -t <registry>/<namespace>/entebus-web-operator:<branch>-latest .
 
 # Running the docker image
 docker run -d --name <container-name> -p <host-port>:<container-port> \
