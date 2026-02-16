@@ -2,6 +2,7 @@
 	import entebusLogo from '$lib/assets/entebus_logo.png';
 	import { goto } from '$app/navigation';
 	import { tick } from 'svelte';
+	import { page } from '$app/stores';
 
 	let username: string = '';
 	let password: string = '';
@@ -20,8 +21,27 @@
 	let showCompanyList = false;
 	let filteredCompanies = companies;
 	let showPassword: boolean = false;
+	let companyName: string | null = null;
+	$: companyName =
+		$page.url.searchParams.get('companyName') ?? $page.url.searchParams.get('name') ?? null;
+	//-- When a company name is provided via the URL, populate the input,
+	// open and filter the list, and set a selected company if there's an exact match. --
+	$: if (companyName) {
+		company = companyName;
+		filteredCompanies = companies.filter((c) =>
+			c.toLowerCase().includes(companyName.toLowerCase())
+		);
+		const exact = companies.find((c) => c.toLowerCase() === companyName.toLowerCase());
+		if (exact) {
+			selectedCompany = exact;
+		} else {
+			selectedCompany = '';
+		}
+		showCompanyList = true;
+		tick().then(() => companyInput?.focus());
+	}
 
-  //-- Password visibility toggle handler --
+	//-- Password visibility toggle handler --
 	function togglePassword() {
 		showPassword = !showPassword;
 	}
@@ -30,18 +50,19 @@
 	function onCompanyInput(e: Event) {
 		const val = (e.target as HTMLInputElement).value;
 		company = val;
-		// typing clears explicit selection until user picks from list
 		selectedCompany = '';
 		filteredCompanies = companies.filter((c) => c.toLowerCase().includes(val.toLowerCase()));
 		showCompanyList = true;
 	}
 
+	//-- Company selection handler --
 	function selectCompany(c: string) {
 		company = c;
 		selectedCompany = c;
 		showCompanyList = false;
 	}
 
+	//-- Company input focus handlers --
 	function onCompanyFocus() {
 		if (selectedCompany && company === selectedCompany) {
 			filteredCompanies = [selectedCompany];
@@ -51,10 +72,12 @@
 		showCompanyList = true;
 	}
 
+	//-- Company input blur handler --
 	function onCompanyBlur() {
 		setTimeout(() => (showCompanyList = false), 150);
 	}
 
+	//-- Company list toggle handler --
 	async function toggleCompanyList() {
 		showCompanyList = !showCompanyList;
 		if (showCompanyList) {
@@ -80,7 +103,11 @@
 		<div class="text-center mb-4">
 			<img src={entebusLogo} alt="Entebus Logo" style="width: 4rem; height: 4rem;" />
 			<h3 class="mt-2 fw-inter-700">Operator Sign In</h3>
-			<h6 class="text-secondary fw-inter-400">Access your Company dashboard</h6>
+			{#if companyName}
+				<p class="text-secondary mb-1">Access <b>{companyName}</b> dashboard</p>
+			{:else}
+				<p class="text-secondary mb-1">Access your Company dashboard</p>
+			{/if}
 		</div>
 		<form on:submit|preventDefault={handleLogin}>
 			<!-- company field -->
