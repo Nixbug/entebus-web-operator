@@ -92,9 +92,6 @@
 	function handleLogin() {
 		goto('/dashboard');
 		alert('Login successful!');
-		console.log('Company:', company);
-		console.log('Username:', username);
-		console.log('Password:', password);
 	}
 </script>
 
@@ -146,7 +143,7 @@
 								aria-selected={comp === selectedCompany}
 								class="company-item"
 								class:selected={comp === selectedCompany}
-								on:mousedown={() => selectCompany(comp)}
+								on:mousedown|preventDefault={() => {}}
 								on:click={() => selectCompany(comp)}
 								on:keydown={(event) => {
 									if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
@@ -190,7 +187,9 @@
 						role="button"
 						tabindex="0"
 						on:click={togglePassword}
-						on:keydown={(e) => e.key === 'Enter' && togglePassword()}
+						on:keydown={(e) =>
+							(e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') &&
+							(e.preventDefault(), togglePassword())}
 						aria-label="Toggle password visibility"
 						aria-pressed={showPassword}
 						style="cursor: pointer;"
