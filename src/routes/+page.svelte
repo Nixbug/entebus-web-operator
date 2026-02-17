@@ -8,7 +8,7 @@
 	let password: string = '';
 	let company: string = '';
 	let selectedCompany: string = '';
-	let companyInput: HTMLInputElement;
+	let companyInput: HTMLInputElement | null = null;
 	let companies: string[] = [
 		'Entebus',
 		'Acme Transport',
@@ -207,9 +207,9 @@
 				<label class="form-check-label text-secondary" for="remember-me">Remember Me</label>
 			</div>
 			<!-- login button -->
-			<button type="submit" style="color: white;" class="btn sign-in-btn mb-3 w-100 fw-inter-700"
-				>Sign in</button
-			>
+			<button type="submit" style="color: white;" class="btn sign-in-btn mb-3 w-100 fw-inter-700">
+				Sign in
+			</button>
 		</form>
 	</div>
 </div>

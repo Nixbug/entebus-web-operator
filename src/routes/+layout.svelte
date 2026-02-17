@@ -3,5 +3,3 @@
 </script>
 
 <slot /> <!-- renders all pages -->
-
-
