@@ -54,11 +54,10 @@ npm run preview
 
 Build, run, and push the image:
 The image is tagged using the format: <branch-name>-<commit-id> (for latest image you may add optional tag <branch-name>-latest).
-bash
 
 # Building the docker image
 
-```
+```bash
 docker build -t <registry>/<namespace>/entebus-web-operator:<branch>-<commit-id> \
              -t <registry>/<namespace>/entebus-web-operator:<branch>-latest .
 

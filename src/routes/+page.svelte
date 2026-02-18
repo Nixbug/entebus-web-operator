@@ -16,6 +16,7 @@
 	let companyName: string | null = null;
 	let filteredCompanies: Company[] = [];
 	let loginError = '';
+	let prefilledCompany = false;
 
 	//-- Check URL for companyName or name query parameter to pre-fill company field --
 	$: companyName =
@@ -26,17 +27,20 @@
 		c.name.toLowerCase().includes(companySearch.toLowerCase())
 	);
 
-	//-- If companyName is set, pre-fill company field and show dropdown --
-	$: if (companyName && !selectedCompany) {
-		const name = companyName;
-		companySearch = name;
-		const exact = companies.find((c) => c.name.toLowerCase() === name.toLowerCase());
-		if (exact) {
-			selectedCompany = exact.name;
+	//-- If companyName is set, pre-fill company field and show dropdown (run once) --
+		$: if (companyName && !selectedCompany && !prefilledCompany) {
+			const name = companyName;
+			if (!companySearch) {
+				companySearch = name;
+			}
+			const exact = companies.find((c) => c.name.toLowerCase() === name.toLowerCase());
+			if (exact) {
+				selectedCompany = exact.name;
+			}
+			showDropdown = true;
+			prefilledCompany = true;
+			tick().then(() => companyInput?.focus());
 		}
-		showDropdown = true;
-		tick().then(() => companyInput?.focus());
-	}
 
 	//-- Toggle password visibility --
 	function togglePassword() {
@@ -144,7 +148,7 @@
 							{#each filteredCompanies as comp, i}
 								<button
 									type="button"
-									id="company-option-{i}"
+									id={"company-option-" + i}
 									role="option"
 									class="dropdown-item-custom"
 									class:selected={comp.name === selectedCompany}
