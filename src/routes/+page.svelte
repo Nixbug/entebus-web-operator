@@ -8,6 +8,7 @@
 
 	let username: string = '';
 	let password: string = '';
+	let rememberMe: boolean = false;
 	let companySearch: string = '';
 	let selectedCompany: string = '';
 	let companyInput: HTMLInputElement | null = null;
@@ -28,19 +29,19 @@
 	);
 
 	//-- If companyName is set, pre-fill company field and show dropdown (run once) --
-		$: if (companyName && !selectedCompany && !prefilledCompany) {
-			const name = companyName;
-			if (!companySearch) {
-				companySearch = name;
-			}
-			const exact = companies.find((c) => c.name.toLowerCase() === name.toLowerCase());
-			if (exact) {
-				selectedCompany = exact.name;
-			}
-			showDropdown = true;
-			prefilledCompany = true;
-			tick().then(() => companyInput?.focus());
+	$: if (companyName && !selectedCompany && !prefilledCompany) {
+		const name = companyName;
+		if (!companySearch) {
+			companySearch = name;
 		}
+		const exact = companies.find((c) => c.name.toLowerCase() === name.toLowerCase());
+		if (exact) {
+			selectedCompany = exact.name;
+		}
+		showDropdown = true;
+		prefilledCompany = true;
+		tick().then(() => companyInput?.focus());
+	}
 
 	//-- Toggle password visibility --
 	function togglePassword() {
@@ -98,9 +99,9 @@
 </script>
 
 <div class="d-flex justify-content-center align-items-center vh-100 bg-light login-bg">
-	<div class="card login-card shadow-sm p-4 mx-3 mx-sm-0 w-100" style="max-width: 30rem;">
+	<div class="card login-card shadow-sm p-4 mx-3 mx-sm-0 w-100">
 		<div class="text-center mb-4">
-			<img src={entebusLogo} alt="Entebus Logo" style="width: 4rem; height: 4rem;" />
+			<img src={entebusLogo} alt="Entebus Logo" class="logo-img" />
 			<h3 class="mt-2 fw-inter-700">Operator Sign In</h3>
 			{#if companyName}
 				<p class="text-secondary mb-1">Access <b>{companyName}</b> Dashboard</p>
@@ -110,8 +111,8 @@
 		</div>
 
 		<form on:submit|preventDefault={handleLogin}>
-			<!-- Company field with improved dropdown -->
-			<div class="mb-3 company-field-container" style="position: relative;">
+			<!-- Company field with dropdown -->
+			<div class="mb-3 company-field-container">
 				<label for="companyName" class="form-label">Company</label>
 				<div class="input-group">
 					<input
@@ -141,14 +142,14 @@
 					</button>
 				</div>
 
-				<!-- Improved Dropdown -->
+				<!-- Dropdown -->
 				{#if showDropdown}
 					<div class="dropdown-menu-custom" id="company-listbox" role="listbox">
 						{#if filteredCompanies.length > 0}
 							{#each filteredCompanies as comp, i}
 								<button
 									type="button"
-									id={"company-option-" + i}
+									id={'company-option-' + i}
 									role="option"
 									class="dropdown-item-custom"
 									class:selected={comp.name === selectedCompany}
@@ -204,7 +205,7 @@
 						required
 					/>
 					<span
-						class="input-group-text bg-white border-1"
+						class="input-group-text bg-white border-1 password-toggle"
 						role="button"
 						tabindex="0"
 						on:click={togglePassword}
@@ -213,19 +214,15 @@
 							(e.preventDefault(), togglePassword())}
 						aria-label="Toggle password visibility"
 						aria-pressed={showPassword}
-						style="cursor: pointer;"
 					>
-						<i
-							class={`bi ${showPassword ? 'bi-eye' : 'bi-eye-slash'} eye-color`}
-							style="font-size: 1.25rem;"
-						></i>
+						<i class={`bi ${showPassword ? 'bi-eye' : 'bi-eye-slash'} eye-color`}></i>
 					</span>
 				</div>
 			</div>
 
 			<!-- Remember me checkbox -->
 			<div class="mb-3 form-check">
-				<input type="checkbox" class="form-check-input" id="remember-me" />
+				<input type="checkbox" class="form-check-input" id="remember-me" bind:checked={rememberMe} />
 				<label class="form-check-label text-secondary" for="remember-me">Remember Me</label>
 			</div>
 
@@ -343,5 +340,31 @@
 	.dropdown-empty i {
 		color: #47c7ff;
 		opacity: 0.5;
+	}
+
+	.login-card {
+		max-width: 30rem;
+	}
+
+	.logo-img {
+		width: 4rem;
+		height: 4rem;
+		object-fit: contain;
+	}
+
+	.company-field-container {
+		position: relative;
+	}
+
+	.password-toggle {
+		cursor: pointer;
+	}
+
+	.password-toggle .bi {
+		font-size: 1.25rem;
+	}
+
+	.sign-in-btn {
+		color: white;
 	}
 </style>
