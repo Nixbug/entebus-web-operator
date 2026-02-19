@@ -168,7 +168,7 @@
 							{/each}
 						{:else}
 							<div class="dropdown-empty">
-								<i class="bi bi-search mb-2" style="font-size: 1.5rem;"></i>
+								<i class="bi bi-search mb-2 fs-4"></i>
 								<p class="mb-0">No companies found matching "{companySearch}"</p>
 							</div>
 						{/if}
@@ -210,9 +210,8 @@
 						tabindex="0"
 						on:click={togglePassword}
 						on:keydown={(e) =>
-							(e.key === 'Enter' || e.key === ' ' || e.key === 'Spacebar') &&
-							(e.preventDefault(), togglePassword())}
-						aria-label="Toggle password visibility"
+							(e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), togglePassword())}
+						aria-label={showPassword ? 'Hide password' : 'Show password'}
 						aria-pressed={showPassword}
 					>
 						<i class={`bi ${showPassword ? 'bi-eye' : 'bi-eye-slash'} eye-color`}></i>
@@ -222,14 +221,17 @@
 
 			<!-- Remember me checkbox -->
 			<div class="mb-3 form-check">
-				<input type="checkbox" class="form-check-input" id="remember-me" bind:checked={rememberMe} />
+				<input
+					type="checkbox"
+					class="form-check-input"
+					id="remember-me"
+					bind:checked={rememberMe}
+				/>
 				<label class="form-check-label text-secondary" for="remember-me">Remember Me</label>
 			</div>
 
 			<!-- Login button -->
-			<button type="submit" style="color: white;" class="btn sign-in-btn mb-3 w-100 fw-inter-700">
-				Sign in
-			</button>
+			<button type="submit" class="btn sign-in-btn mb-3 w-100 fw-inter-700"> Sign in </button>
 		</form>
 	</div>
 </div>
@@ -243,6 +245,7 @@
 	}
 	.sign-in-btn {
 		background: linear-gradient(90deg, #2033b1 0%, #47c7ff 50%, #10c555 100%);
+		color: white;
 		border: none;
 		border-radius: 8px;
 		padding: 12px;
@@ -362,9 +365,5 @@
 
 	.password-toggle .bi {
 		font-size: 1.25rem;
-	}
-
-	.sign-in-btn {
-		color: white;
 	}
 </style>
