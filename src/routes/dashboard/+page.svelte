@@ -73,7 +73,7 @@
 				<div class="row">
 					<div class="col-12 col-md-8 col-lg-7 col-xl-6 mt-4 dashboard-header">
 						<h2 class="fw-inter-700">Welcome back, John!</h2>
-						<p>Manage your operator dashboard and business operations from here.</p>
+						<p>Manage your company dashboard from here.</p>
 					</div>
 				</div>
 
