@@ -6,35 +6,35 @@
 		{
 			title: 'Operator Account',
 			description: 'Manage operator accounts',
-			icon: 'bi-person-fill',
+			icon: 'bi bi-person-fill',
 			color: '#1E63E9',
 			href: '/operator-account'
 		},
 		{
 			title: 'Operator Role Management',
 			description: 'Manage operator roles',
-			icon: 'bi-shield-lock-fill',
+			icon: 'bi bi-shield-lock-fill',
 			color: '#22C55E',
 			href: '/operator-role'
 		},
 		{
 			title: 'Company Vehicles',
 			description: 'Manage company vehicles',
-			icon: 'bi-bus-front-fill',
+			icon: 'bi bi-bus-front-fill',
 			color: '#6366F1',
 			href: '/vehicles'
 		},
 		{
 			title: 'Local Fare',
 			description: 'Manage fare structures',
-			icon: 'bi-currency-rupee',
+			icon: 'bi bi-currency-rupee',
 			color: '#A855F7',
 			href: '/local-fare'
 		},
 		{
 			title: 'Service Routes',
 			description: 'Manage service routes',
-			icon: 'bi-geo-alt-fill',
+			icon: 'bi bi-geo-alt-fill',
 			color: '#F59E0B',
 			href: '/service-route'
 		},
@@ -48,7 +48,7 @@
 		{
 			title: 'Schedules',
 			description: 'Manage schedules',
-			icon: 'bi-calendar-event-fill',
+			icon: 'bi bi-calendar-event-fill',
 			color: '#10B981',
 			href: '/schedules'
 		},
