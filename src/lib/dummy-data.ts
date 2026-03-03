@@ -56,7 +56,7 @@ export const operators: Operator[] = [
 		username: 'john',
 		password: 'test@123',
 		isYou: true,
-		phone: '+91 98765 00001',
+		phone: '98765 00001',
 		createdAt: 'Jan 18, 2024',
 		isActive: true
 	},
@@ -69,7 +69,7 @@ export const operators: Operator[] = [
 		email: 'alice@entebus.com',
 		username: 'alice',
 		password: 'test@123',
-		phone: '+91 98765 00002',
+		phone: '98765 00002',
 		createdAt: 'Feb 02, 2024',
 		isActive: true
 	},
@@ -82,7 +82,7 @@ export const operators: Operator[] = [
 		email: 'rahul@entebus.com',
 		username: 'rahul',
 		password: 'test@123',
-		phone: '+91 98765 00003',
+		phone: '98765 00003',
 		createdAt: 'Feb 10, 2024',
 		isActive: true
 	},
@@ -95,7 +95,7 @@ export const operators: Operator[] = [
 		email: 'sneha@entebus.com',
 		username: 'sneha',
 		password: 'test@123',
-		phone: '+91 98765 00004',
+		phone: '98765 00004',
 		createdAt: 'Feb 15, 2024',
 		isActive: false
 	},
@@ -108,7 +108,7 @@ export const operators: Operator[] = [
 		email: 'arjun@entebus.com',
 		username: 'arjun',
 		password: 'test@123',
-		phone: '+91 98765 00005',
+		phone: '98765 00005',
 		createdAt: 'Mar 01, 2024',
 		isActive: true
 	},
@@ -121,7 +121,7 @@ export const operators: Operator[] = [
 		email: 'priya@entebus.com',
 		username: 'priya',
 		password: 'test@123',
-		phone: '+91 98765 00006',
+		phone: '98765 00006',
 		createdAt: 'Mar 05, 2024',
 		isActive: true
 	},
@@ -134,7 +134,7 @@ export const operators: Operator[] = [
 		email: 'vikram@entebus.com',
 		username: 'vikram',
 		password: 'test@123',
-		phone: '+91 98765 00007',
+		phone: '98765 00007',
 		createdAt: 'Mar 12, 2024',
 		isActive: false
 	},
@@ -147,7 +147,7 @@ export const operators: Operator[] = [
 		email: 'anjali@entebus.com',
 		username: 'anjali',
 		password: 'test@123',
-		phone: '+91 98765 00008',
+		phone: '98765 00008',
 		createdAt: 'Mar 18, 2024',
 		isActive: true
 	},

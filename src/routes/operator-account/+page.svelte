@@ -160,7 +160,7 @@
 			<HomeButton />
 			<!-- PAGE HEADER -->
 			<ListingPageHeader
-				title="Account Management"
+				title="Operator Account Management"
 				subtitle="View and manage all operator accounts"
 				buttonLabel="Add Operator"
 				icon="bi-plus-lg"
@@ -168,7 +168,7 @@
 			/>
 			<!-- SEARCH & FILTER BAR -->
 			<SearchFilterBar
-				searchPlaceholder="Search by name, ID, designation, or email..."
+				searchPlaceholder="Search by name, ID, phone, or email..."
 				{filters}
 				on:update={handleSearchAndFilterUpdate}
 			/>
