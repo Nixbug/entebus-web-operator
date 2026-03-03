@@ -55,6 +55,7 @@ export const operators: Operator[] = [
 		email: 'john@entebus.com',
 		username: 'john',
 		password: 'test@123',
+		isYou: true,
 		phone: '+91 98765 00001',
 		createdAt: 'Jan 18, 2024',
 		isActive: true

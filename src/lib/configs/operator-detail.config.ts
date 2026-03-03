@@ -9,6 +9,7 @@ export function getOperatorDetailConfig(data: Operator): DetailConfig {
 			initials: data.initials || 'JD',
 			color: '#3b82f6',
 			name: data.name || 'John Doe',
+			isYou: data.isYou || false,
 			isActive: data.isActive !== false
 		},
 		sections: [

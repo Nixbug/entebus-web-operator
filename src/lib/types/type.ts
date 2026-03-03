@@ -15,6 +15,7 @@ export type Operator = {
 	email: string;
 	phone: string;
 	gender: string;
+	isYou?: boolean;
 	createdAt: string;
 	updatedAt?: string;
 	isActive?: boolean;
