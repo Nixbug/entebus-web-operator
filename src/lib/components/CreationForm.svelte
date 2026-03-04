@@ -16,7 +16,7 @@
 	}[] = [];
 
 	export let values: Record<string, string> = {};
-	export let title = 'Add New Executive';
+	export let title = 'Add New Operator';
 	export let titleIcon = 'bi-plus-lg';
 	export let submitText = 'Create';
 	export let open = false;
