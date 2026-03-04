@@ -2,7 +2,45 @@
 @import 'bootstrap-icons/font/bootstrap-icons.css';
 
 :root {
+	/*-- Fonts --*/
 	--font-base: 'Inter', system-ui, sans-serif;
+
+	/*-- Backgrounds --*/
+	--bg-primary: #f8f9fa;
+	--bg-card: #ffffff;
+
+	/*-- Text --*/
+	--text-primary: #212529;
+	--text-muted: #6c757d;
+
+	/*-- Borders --*/
+	--border: #dee2e6;
+
+	/*-- Online chip (light mode) --*/
+	--online-bg: #e6f4ea;
+	--online-fg: #137333;
+
+	/*-- icon-hover --*/
+	--icon-hover-bg: #f0f0f0;
+}
+
+.dark {
+	/*-- Backgrounds --*/
+	--bg-primary: #1e1e2f;
+	--bg-card: #2a2a3e;
+
+	/*-- Text --*/
+	--text-primary: #ffffff;
+	--text-muted: #d1d6e0;
+
+	/*-- Borders --*/
+	--border: #3b3b52;
+
+	/*-- Online chip (dark mode) --*/
+	--online-bg: #3cb62417;
+	--online-fg: #00e676;
+	/*-- icon-hover --*/
+	--icon-hover-bg: #2965a5;
 }
 
 /*-- font Styles --*/
