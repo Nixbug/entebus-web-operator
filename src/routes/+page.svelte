@@ -3,44 +3,87 @@
 	import { goto } from '$app/navigation';
 	import { tick, onMount } from 'svelte';
 	import { page } from '$app/stores';
-	import { companies } from '$lib/dummy-data';
-	import type { Company } from '$lib/types/type';
+	import type { components } from '$lib/api/types';
+	import {
+		executiveLogin,
+		validateToken,
+		getClientDetails,
+		storeToken,
+		scheduleTokenRefresh,
+		loadPermissions,
+		getToken
+	} from '$lib/services/auth';
+	import { fetchCompanyAccount } from '$lib/services/company';
+	import { Store } from '$lib/stores/session-store';
+	import { handleApiError } from '$lib/utils/api-error';
+	import { loginSchema } from '$lib/schemas';
+	import toast from '$lib/utils/toast';
+	import { writable } from 'svelte/store';
+
+	type CompanyItem = Pick<components['schemas']['CompanySchema'], 'id' | 'name'>;
+
+	const LIMIT = 10;
 
 	let username: string = '';
 	let password: string = '';
 	let rememberMe: boolean = false;
 	let companySearch: string = '';
 	let selectedCompany: string = '';
+	let selectedCompanyId: number | null = null;
 	let companyInput: HTMLInputElement | null = null;
 	let showDropdown = false;
 	let showPassword = false;
 	let companyName: string | null = null;
-	let filteredCompanies: Company[] = [];
+	let companies: CompanyItem[] = [];
+	let companyLoading = false;
+	let hasMore = false;
+	let companyOffset = 0;
 	let loginError = '';
 	let prefilledCompany = false;
+	let loading = false;
+	let error = '';
+	let checkingToken = true;
+	let searchDebounce: ReturnType<typeof setTimeout> | null = null;
+	const fieldErrors = writable<{ username?: string; password?: string }>({});
+	const clientDetails = getClientDetails();
 
 	//-- Check URL for companyName or name query parameter to pre-fill company field --
 	$: companyName =
 		$page.url.searchParams.get('companyName') ?? $page.url.searchParams.get('name') ?? null;
 
-	//-- Filter companies based on search input --
-	$: filteredCompanies = companies.filter((c) =>
-		c.name.toLowerCase().includes(companySearch.toLowerCase())
-	);
-
-	//-- If companyName is set, pre-fill company field and show dropdown (run once) --
+	//-- If companyName is set, pre-fill company field and load (run once) --
 	$: if (companyName && !selectedCompany && !prefilledCompany) {
-		const name = companyName;
-		if (!companySearch) {
-			companySearch = name;
-		}
-		const exact = companies.find((c) => c.name.toLowerCase() === name.toLowerCase());
-		if (exact) {
-			selectedCompany = exact.name;
-		}
-		showDropdown = true;
+		companySearch = companyName;
 		prefilledCompany = true;
-		tick().then(() => companyInput?.focus());
+		showDropdown = true;
+		(async () => {
+			await loadCompanies(true);
+			const exact = companies.find((c) => c.name.toLowerCase() === companyName!.toLowerCase());
+			if (exact) selectCompany(exact.id, exact.name);
+			await tick();
+			companyInput?.focus();
+		})();
+	}
+
+	async function loadCompanies(reset = false) {
+		if (companyLoading) return;
+		companyLoading = true;
+		const offset = reset ? 0 : companyOffset;
+		try {
+			const result = await fetchCompanyAccount({
+				search: companySearch || undefined,
+				limit: LIMIT,
+				offset,
+				publicAccess: true
+			});
+			companies = reset ? result : [...companies, ...result];
+			hasMore = result.length === LIMIT;
+			companyOffset = offset + result.length;
+		} catch {
+			// silently ignore
+		} finally {
+			companyLoading = false;
+		}
 	}
 
 	//-- Toggle password visibility --
@@ -48,19 +91,23 @@
 		showPassword = !showPassword;
 	}
 
-	//-- Handle company input --
+	//-- Handle company input with debounced search --
 	function onCompanyInput(e: Event) {
 		const val = (e.target as HTMLInputElement).value;
 		companySearch = val;
 		selectedCompany = '';
+		selectedCompanyId = null;
 		loginError = '';
 		showDropdown = true;
+		if (searchDebounce) clearTimeout(searchDebounce);
+		searchDebounce = setTimeout(() => loadCompanies(true), 300);
 	}
 
 	//-- Select company from dropdown --
-	function selectCompany(name: string) {
+	function selectCompany(id: number, name: string) {
 		companySearch = name;
 		selectedCompany = name;
+		selectedCompanyId = id;
 		loginError = '';
 		showDropdown = false;
 	}
@@ -68,6 +115,7 @@
 	//-- Focus on company input when dropdown is opened --
 	function onCompanyFocus() {
 		showDropdown = true;
+		if (companies.length === 0) loadCompanies(true);
 	}
 
 	//-- Handle click outside of dropdown --
@@ -81,17 +129,76 @@
 	//-- Toggle dropdown --
 	function toggleDropdown() {
 		showDropdown = !showDropdown;
+		if (showDropdown && companies.length === 0) loadCompanies(true);
 		tick().then(() => companyInput?.focus());
 	}
 
 	//-- Handle login --
-	function handleLogin() {
-		if (!selectedCompany) {
-			loginError = 'Please select a company from the list.';
+	const handleLogin = async () => {
+		if (!selectedCompanyId) {
+			loginError = 'Please select a company from the list';
 			return;
 		}
-		goto('/dashboard');
-	}
+		loading = true;
+		error = '';
+		//-- Reset field errors --
+		fieldErrors.set({ username: '', password: '' });
+		//-- Validate with Zod --
+		const result = loginSchema.safeParse({ username, password });
+		if (!result.success) {
+			//-- Extract errors --
+			const formatted = result.error.format();
+			fieldErrors.set({
+				username: formatted.username?._errors[0] || '',
+				password: formatted.password?._errors[0] || ''
+			});
+			loading = false;
+			return;
+		}
+		const { username: parsedUsername, password: parsedPassword } = result.data;
+		try {
+			const token = await executiveLogin(
+				parsedUsername,
+				parsedPassword,
+				selectedCompanyId,
+				clientDetails ? JSON.stringify(clientDetails) : undefined
+			);
+			if (rememberMe) {
+				localStorage.setItem('username', parsedUsername);
+				Store.clearData('username');
+			} else {
+				Store.storeData<string>('username', parsedUsername);
+				localStorage.removeItem('username');
+			}
+			storeToken(token, rememberMe);
+			scheduleTokenRefresh(token);
+			await loadPermissions();
+			toast.success('User login successful!');
+			goto('/dashboard');
+		} catch (err: any) {
+			error = await handleApiError(err);
+			toast.error(error);
+		} finally {
+			loading = false;
+		}
+	};
+	//-- Validate token on mount --
+	onMount(async () => {
+		try {
+			const valid = await validateToken();
+			if (valid) {
+				await loadPermissions();
+				const token = getToken();
+				if (token) scheduleTokenRefresh(token);
+				goto('/dashboard', { replaceState: true });
+			}
+		} catch (err) {
+			console.error('Token validation failed:', err);
+			toast.error('Unable to validate session. Please sign in again.');
+		} finally {
+			checkingToken = false;
+		}
+	});
 	onMount(() => {
 		document.addEventListener('click', handleClickOutside);
 		return () => document.removeEventListener('click', handleClickOutside);
@@ -145,20 +252,25 @@
 				<!-- Dropdown -->
 				{#if showDropdown}
 					<div class="dropdown-menu-custom" id="company-listbox" role="listbox">
-						{#if filteredCompanies.length > 0}
-							{#each filteredCompanies as comp, i}
+						{#if companyLoading && companies.length === 0}
+							<div class="dropdown-empty">
+								<div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+								<p class="mb-0 mt-2">Loading companies...</p>
+							</div>
+						{:else if companies.length > 0}
+							{#each companies as comp, i}
 								<button
 									type="button"
 									id={'company-option-' + i}
 									role="option"
 									class="dropdown-item-custom"
-									class:selected={comp.name === selectedCompany}
-									aria-selected={comp.name === selectedCompany}
-									on:click={() => selectCompany(comp.name)}
+									class:selected={comp.id === selectedCompanyId}
+									aria-selected={comp.id === selectedCompanyId}
+									on:click={() => selectCompany(comp.id, comp.name)}
 									on:keydown={(e) => {
 										if (e.key === 'Enter' || e.key === ' ') {
 											e.preventDefault();
-											selectCompany(comp.name);
+											selectCompany(comp.id, comp.name);
 										}
 									}}
 								>
@@ -166,6 +278,19 @@
 									{comp.name}
 								</button>
 							{/each}
+							{#if hasMore}
+								<button
+									type="button"
+									class="dropdown-load-more"
+									on:click|stopPropagation={() => loadCompanies(false)}
+									disabled={companyLoading}
+								>
+									{#if companyLoading}
+										<span class="spinner-border spinner-border-sm me-1" role="status"></span>
+									{/if}
+									Load more
+								</button>
+							{/if}
 						{:else}
 							<div class="dropdown-empty">
 								<i class="bi bi-search mb-2 fs-4"></i>
@@ -231,7 +356,14 @@
 			</div>
 
 			<!-- Login button -->
-			<button type="submit" class="btn sign-in-btn mb-3 w-100 fw-inter-700"> Sign in </button>
+			<button type="submit" class="btn sign-in-btn mb-3 w-100 fw-inter-700" disabled={loading}>
+				{#if loading}
+					<span class="spinner-border spinner-border-sm me-2" role="status"></span>
+					Signing in...
+				{:else}
+					Sign in
+				{/if}
+			</button>
 		</form>
 	</div>
 </div>
@@ -343,6 +475,28 @@
 	.dropdown-empty i {
 		color: #47c7ff;
 		opacity: 0.5;
+	}
+
+	.dropdown-load-more {
+		display: block;
+		width: 100%;
+		padding: 0.6rem 1rem;
+		border: none;
+		border-top: 1px solid #f0f0f0;
+		background: none;
+		text-align: center;
+		font-size: 0.85rem;
+		color: #2033b1;
+		cursor: pointer;
+	}
+
+	.dropdown-load-more:hover:not(:disabled) {
+		background: rgba(32, 51, 177, 0.05);
+	}
+
+	.dropdown-load-more:disabled {
+		opacity: 0.6;
+		cursor: not-allowed;
 	}
 
 	.login-card {

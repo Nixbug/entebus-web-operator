@@ -37,6 +37,8 @@
 	},
 	"dependencies": {
 		"bootstrap": "^5.3.8",
-		"bootstrap-icons": "^1.13.1"
+		"bootstrap-icons": "^1.13.1",
+		"svelte-sonner": "^1.0.8",
+		"zod": "^4.1.12"
 	}
 }
