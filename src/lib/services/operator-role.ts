@@ -31,7 +31,7 @@ export async function fetchRoleById(id: number): Promise<Role | null> {
 }
 
 //-- Fetch role list with common search params --
-export async function fetchExecutiveRoleList({
+export async function fetchOperatorRoleList({
 	name,
 	id,
 	search,
@@ -59,7 +59,7 @@ export async function fetchExecutiveRoleList({
 	return res.data ?? [];
 }
 
-//-- Creates executive role --
+//-- Creates operator role --
 export async function createRole(payload: CreateRoleRequest): Promise<CreateRoleResponse> {
 	const url = `/company/role`;
 	const res = await apiFetch<CreateRoleResponse>('POST', url, {
@@ -70,7 +70,7 @@ export async function createRole(payload: CreateRoleRequest): Promise<CreateRole
 	return res.data as CreateRoleResponse;
 }
 
-//-- Updates executive role by ID --
+//-- Updates operator role by ID --
 export async function updateRole(
 	id: number,
 	payload: UpdateRoleRequest
@@ -84,7 +84,7 @@ export async function updateRole(
 	return res.data as UpdateRoleResponse;
 }
 
-//-- Deletes executive role by ID --
+//-- Deletes operator role by ID --
 export async function deleteRole(id: number): Promise<void> {
 	const url = `/company/role/${encodeURIComponent(String(id))}`;
 	const res = await apiFetch<void>('DELETE', url);

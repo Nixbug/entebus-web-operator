@@ -15,7 +15,7 @@
 	let showLogoutConfirm = false;
 	let loggingOut = false;
 	let username = 'Unknown user';
-	let executiveId = '-';
+	let operatorId = '-';
 
 	//-- Bind avatar button for focus restoration
 	let avatarBtnEl: HTMLButtonElement | null = null;
@@ -46,8 +46,8 @@
 		if (storedUsername) username = storedUsername;
 
 		const token = getToken() as Record<string, unknown> | null;
-		if (token && token.executive_id !== undefined && token.executive_id !== null) {
-			executiveId = String(token.executive_id);
+		if (token && token.operator_id !== undefined && token.operator_id !== null) {
+			operatorId = String(token.operator_id);
 		}
 
 		const mql = window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT}px)`);
@@ -288,7 +288,7 @@
 				<p class="mb-3">Are you sure you want to logout from this account?</p>
 				<div class="logout-user-meta rounded-3 px-3 py-2">
 					<p class="mb-1"><strong>Username:</strong> {username}</p>
-					<p class="mb-0"><strong>Executive ID:</strong> {executiveId}</p>
+					<p class="mb-0"><strong>Operator ID:</strong> {operatorId}</p>
 				</div>
 			</div>
 			<div class="d-flex gap-2 px-4 pb-4">

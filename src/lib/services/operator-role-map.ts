@@ -16,10 +16,10 @@ export type UpdateRoleMapRequest =
 
 export type UpdateRoleMapResponse =
 	operations['update_role_map_operator_company_account_role__id__patch']['responses'][200]['content']['application/json'];
-//-- Fetches the role map for a given executive ID. --
-export async function fetchRoleMap(executiveId?: number): Promise<RoleMap[]> {
+//-- Fetches the role map for a given operator ID and optional executive ID. --
+export async function fetchRoleMap(operatorId?: number): Promise<RoleMap[]> {
 	const params = new URLSearchParams();
-	if (executiveId !== undefined) params.append('executive_id', String(executiveId));
+	if (operatorId !== undefined) params.append('operator_id', String(operatorId));
 	const query = params.toString();
 	const url = `/company/account/role${query ? `?${query}` : ''}`;
 

@@ -81,7 +81,7 @@ export function getOperatorDetailConfig(
 						label: 'STATUS',
 						value: data.status,
 						type: 'select',
-						editable: true,
+						editable: !data.isYou,
 						icon: 'bi bi-toggle-on',
 						iconColor: '#db2777',
 						iconBg: 'rgba(219, 39, 119, 0.18)',

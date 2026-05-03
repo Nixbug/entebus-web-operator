@@ -53,6 +53,7 @@ export type Operator = {
 	email: string;
 	phone: string;
 	gender: string;
+	isYou?: boolean;
 	status: string;
 	type: string;
 	createdAt: string;

@@ -13,7 +13,10 @@
 		mapStatusToLabel,
 		mapOperatorTypeToLabel,
 		titleCase,
-		utcToIstFormat
+		utcToIstFormat,
+
+		getLoggedInUserId
+
 	} from '$lib/helpers';
 	import { page } from '$app/stores';
 	import FloatingAddButton from '$lib/components/FloatingAddButton.svelte';
@@ -32,12 +35,12 @@
 		deleteOperatorAccount
 	} from '$lib/services/operator-account';
 	import {
-		fetchOperatorRoleMap,
+		fetchRoleMap,
 		createRoleMap,
-		type CreateOperatorRoleMapRequest,
-		type UpdateOperatorRoleMapRequest,
-		deleteOperatorRoleMap,
-		updateOperatorRoleMap
+		type CreateRoleMapRequest,
+		type UpdateRoleMapRequest,
+		deleteRoleMap,
+		updateRoleMap
 	} from '$lib/services/operator-role-map';
 	import { fetchOperatorRoleList } from '$lib/services/operator-role';
 	import {
@@ -56,21 +59,6 @@
 		canDeleteCompanyOperator
 	} from '$lib/utils/permissions';
 
-	//-- Filter by company id from URL (accepts either ?companyId=... or ?id=... from dashboard) --
-	//-- Also refetches data when companyId changes (e.g., when coming from a different dashboard) --
-	let companyId: string | null = null;
-	let previousCompanyId: string | null | undefined = undefined;
-	$: companyId =
-		$page.url.searchParams.get('companyId') ?? $page.url.searchParams.get('id') ?? null;
-
-	$: if (previousCompanyId === undefined) {
-		previousCompanyId = companyId;
-	} else if (previousCompanyId !== companyId) {
-		previousCompanyId = companyId;
-		currentPage = 1;
-		fetchOperators();
-	}
-
 	let selected: Operator | null = null;
 	let showDetail = false;
 	let detailConfig: DetailConfig | null = null;
@@ -82,17 +70,10 @@
 		offset: number = 0
 	): Promise<Array<{ id: number; name: string }>> {
 		try {
-			const parsedCompanyId = companyId ? Number(companyId) : undefined;
-			const validCompanyId =
-				typeof parsedCompanyId === 'number' && Number.isFinite(parsedCompanyId)
-					? parsedCompanyId
-					: undefined;
-
 			const result = await fetchOperatorRoleList({
 				search: q,
 				limit,
-				offset,
-				company_id: validCompanyId
+				offset
 			});
 			if (!Array.isArray(result)) return [];
 
@@ -121,7 +102,7 @@
 		if (row.apiId) {
 			try {
 				//-- Get role mappings for this operator --
-				const roleMap = await fetchOperatorRoleMap(row.apiId);
+				const roleMap = await fetchRoleMap(row.apiId);
 				if (currentDetailRequestId !== detailRequestId) return; //-- stale response, discard --
 				if (roleMap && roleMap.length > 0) {
 					//-- Single-role model: use only the first mapping --
@@ -214,16 +195,8 @@
 					? OPERATOR_TYPE_VALUE_BY_LABEL[String(activeFilters.type)]
 					: undefined;
 
-			// validate companyId from query params -- avoid passing NaN to the API
-			const parsedCompanyId = companyId ? Number(companyId) : undefined;
-			const validCompanyId =
-				typeof parsedCompanyId === 'number' && Number.isFinite(parsedCompanyId)
-					? parsedCompanyId
-					: undefined;
-
 			const apiData = await fetchOperatorAccount({
 				search: searchTerm,
-				company_id: validCompanyId,
 				gender: genderFilter,
 				status: statusFilter,
 				type: typeFilter,
@@ -238,7 +211,7 @@
 				: Array.isArray((apiData as any)?.data)
 					? (apiData as any).data
 					: [];
-
+const loggedInUserId = getLoggedInUserId()
 			formattedOperatorData = items.map((item: any) => ({
 				id: item.id ? `OPR-${item.id}` : '',
 				apiId: item.id ?? null,
@@ -250,6 +223,7 @@
 				type: mapOperatorTypeToLabel(item.type),
 				status: titleCase(mapStatusToLabel(item.status)),
 				isActive: String(mapStatusToLabel(item.status)).toLowerCase() === 'active',
+				isYou: item.id === loggedInUserId,
 				email: item.email_id ?? '',
 				phone: formatPhone(item.phone_number, true),
 				description: item.description ?? '',
@@ -421,20 +395,10 @@
 	//-- Create Operator Handling --
 	async function handleSubmitOperatorCreate(e: CustomEvent) {
 		const formData = e.detail as Record<string, string>;
-		const parsedCompanyId = companyId ? Number(companyId) : undefined;
-		const validCompanyId =
-			typeof parsedCompanyId === 'number' && Number.isFinite(parsedCompanyId) ? parsedCompanyId : 0;
-
-		if (!Number.isFinite(parsedCompanyId)) {
-			toast.error('Invalid company selected. Please refresh the page and try again.');
-			return;
-		}
-
 		const defaultStatus =
 			typeof STATUS_VALUE_BY_LABEL === 'object' ? (STATUS_VALUE_BY_LABEL['Active'] ?? 1) : 1;
 
 		const payload = {
-			company_id: validCompanyId,
 			username: formData.username,
 			password: formData.password,
 			gender:
@@ -475,7 +439,7 @@
 					await createRoleMap({
 						role_id: roleId,
 						operator_id: operatorId
-					} as CreateOperatorRoleMapRequest);
+					} as CreateRoleMapRequest);
 				} catch (err: any) {
 					const msg = await handleApiError(err);
 					toast.error(msg || 'Failed to assign role to operator.');
@@ -562,13 +526,13 @@
 					//-- If old role exists, update it; otherwise create new role assignment --
 					if (roleMapId) {
 						//-- Update existing role mapping --
-						const updatePayload: UpdateOperatorRoleMapRequest = {
+						const updatePayload: UpdateRoleMapRequest = {
 							role_id: newRoleId
 						};
-						await updateOperatorRoleMap(roleMapId, updatePayload);
+						await updateRoleMap(roleMapId, updatePayload);
 					} else {
 						//-- Create new role mapping --
-						const createPayload: CreateOperatorRoleMapRequest = {
+						const createPayload: CreateRoleMapRequest = {
 							role_id: newRoleId,
 							operator_id: id
 						};
@@ -576,7 +540,7 @@
 					}
 				} else if (roleMapId) {
 					//-- User cleared the role - delete the existing role mapping --
-					await deleteOperatorRoleMap(roleMapId);
+					await deleteRoleMap(roleMapId);
 				}
 			} catch (err: any) {
 				const msg = await handleApiError(err);

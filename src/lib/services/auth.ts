@@ -61,7 +61,12 @@ export function storeToken(token: Token, rememberMe = false) {
 }
 
 //-- executive login --
-export async function executiveLogin(username: string, password: string, companyId: number, clientDetails?: string) {
+export async function executiveLogin(
+	username: string,
+	password: string,
+	companyId: number,
+	clientDetails?: string
+) {
 	const apiResponse = await apiFetch<Token>('POST', '/company/account/token', {
 		contentType: 'form',
 		accessToken: null,
@@ -322,6 +327,7 @@ export async function loadPermissions(): Promise<void> {
 
 		const merged = validPermissions.reduce((acc, perms) => deepOrMerge(acc, perms));
 		savePermissions(merged);
+		console.log('Loaded permissions:', merged);
 	} catch (err) {
 		console.error('loadPermissions error', err);
 		clearPermissions();
