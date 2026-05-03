@@ -241,7 +241,8 @@
 			}
 
 			toast.success('Route and landmarks created successfully.');
-			goto('/service-route');
+			const params = $page.url.searchParams.toString();
+			goto(params ? `/service-route?${params}` : '/service-route');
 		} catch (e: any) {
 			const message = await handleApiError(e);
 			toast.error(message || 'Failed to create route.');
@@ -252,7 +253,8 @@
 
 	//-- Handle cancel --
 	function handleCancelCreate() {
-		goto('/service-route');
+		const params = $page.url.searchParams.toString();
+		goto(params ? `/service-route?${params}` : '/service-route');
 	}
 
 	//-- Layout --
@@ -301,6 +303,7 @@
 				icon="bi bi-arrow-left"
 				ariaLabel="Back to routes"
 				to="/service-route"
+				preserveQuery={true}
 			/>
 
 			<RouteDetailView

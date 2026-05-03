@@ -31,6 +31,7 @@
 	let formattedRoutes: Route[] = [];
 	let loading = false;
 	let totalItems = 0;
+
 	//-- Map landmarks (fetched by viewport location or initial full fetch) --
 	let mapLandmarks: Landmark[] = [];
 	let mapRequestId = 0;
@@ -158,7 +159,6 @@
 			}
 		}
 	}
-
 	function handlePageChange(p: number) {
 		currentPage = p;
 		fetchRoutes();
