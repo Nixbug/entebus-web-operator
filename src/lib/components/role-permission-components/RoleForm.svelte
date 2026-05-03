@@ -198,6 +198,7 @@
 						path={[]}
 						{enabledPermissionsCount}
 						readonly={readOnly}
+						initialOpen={module.id === 'company'}
 					/>
 				{/each}
 			</div>

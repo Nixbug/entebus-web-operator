@@ -15,8 +15,9 @@
 	export let path: string[] = [];
 	export let enabledPermissionsCount: number;
 	export let readonly: boolean = false;
+	export let initialOpen: boolean = false;
 
-	let open = false;
+	let open = initialOpen;
 	let isAll = false;
 
 	//-- Accordion control wiring --
