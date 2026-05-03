@@ -11,7 +11,6 @@
 	import { createEventDispatcher } from 'svelte';
 	import { onMount, onDestroy } from 'svelte';
 	import type { DetailConfig, DetailField } from '$lib/types/detail-config';
-	import type { CreateBusStopRequest, UpdateBusStopRequest } from '$lib/services/bus-stop';
 	import {
 		fetchVehicleImageForVehicle,
 		fetchVehicleImage,
@@ -61,22 +60,6 @@
 	export let hasBusStopEditPermission: boolean = true;
 	export let hasBusStopDeletePermission: boolean = true;
 	export let hasBusStopCreatePermission: boolean = true;
-
-	type DeleteBusStopHandler = (
-		busStopId: string | number
-	) => boolean | void | Promise<boolean | void>;
-	export let onDeleteBusStop: DeleteBusStopHandler = () => {};
-
-	type CreateBusStopHandler = (
-		busStopData: CreateBusStopRequest
-	) => boolean | void | Promise<boolean | void>;
-	export let onCreateBusStop: CreateBusStopHandler = () => {};
-
-	type UpdateBusStopHandler = (
-		busStopId: string | number,
-		payload: UpdateBusStopRequest
-	) => boolean | void | Promise<boolean | void>;
-	export let onUpdateBusStop: UpdateBusStopHandler = () => {};
 
 	//-- Normalize date fields to YYYY-MM-DD for <input type="date"> compatibility --
 	//-- Uses local timezone to avoid ±1 day shift that toISOString() (UTC) can cause --
@@ -550,27 +533,6 @@
 				on:fileSelected={(e) => handleAvatarFile(e.detail.file)}
 			/>
 		{/if}
-
-		<!-- Bus Stops Section (for landmarks) -->
-		{#if sectionName === 'landmark' && !isEditing}
-			<BusStopsSection
-				bind:this={busStopsSectionRef}
-				{busStops}
-				landmarkId={String(data.apiId ?? '')}
-				{busStopLocation}
-				bind:editingBusStopId
-				{onDeleteBusStop}
-				{onCreateBusStop}
-				{onUpdateBusStop}
-				on:created={() => {
-					busStopLocation = null;
-				}}
-				{hasBusStopEditPermission}
-				{hasBusStopDeletePermission}
-				{hasBusStopCreatePermission}
-			/>
-		{/if}
-
 		<!-- Dynamic Sections -->
 		{#each config.sections as section}
 			<section class="section">
