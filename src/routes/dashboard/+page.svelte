@@ -44,20 +44,6 @@
 			icon: 'bi bi-person-badge-fill',
 			color: '#F87171',
 			href: '/company-services'
-		},
-		{
-			title: 'Schedules',
-			description: 'Manage schedules',
-			icon: 'bi bi-calendar-event-fill',
-			color: '#10B981',
-			href: '/schedules'
-		},
-		{
-			title: 'Duty',
-			description: 'View and manage duty',
-			icon: 'bi bi-person-workspace',
-			color: '#3B82F6',
-			href: '/duty'
 		}
 	];
 </script>
