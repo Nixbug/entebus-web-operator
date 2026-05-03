@@ -15,6 +15,7 @@
 	export let pageDescription: string =
 		'Fare templates are used to calculate fares for different types of tickets';
 	export let listingHref: string = '/global-fare';
+	export let isGlobalFare: boolean = false;
 	const dispatch = createEventDispatcher();
 	let showDeleteModal = false;
 	let loading = false;
@@ -445,12 +446,12 @@ return -1;
 									{:else}
 										<div
 											class="button-wrapper"
-											title={!canDelete ? 'You do not have permission to delete fares.' : ''}
+											title={!canDelete || isGlobalFare ? 'You do not have permission to delete fares.' : ''}
 										>
 											<button
 												class="btn btn-danger w-100"
 												on:click={openDeleteModal}
-												disabled={loading || !canDelete}
+												disabled={loading || !canDelete || isGlobalFare}
 											>
 												Delete Fare
 											</button>
@@ -459,12 +460,12 @@ return -1;
 									{#if formHasChanged}
 										<div
 											class="button-wrapper"
-											title={!canUpdate ? 'You do not have permission to update fares.' : ''}
+											title={!canUpdate || isGlobalFare ? 'You do not have permission to update fares.' : ''}
 										>
 											<button
 												class="btn btn-primary w-100"
 												on:click={handleSubmit}
-												disabled={loading || !formHasChanged || !canUpdate}
+												disabled={loading || !formHasChanged || !canUpdate || isGlobalFare}
 											>
 												{loading ? 'Saving...' : 'Update'}
 											</button>
