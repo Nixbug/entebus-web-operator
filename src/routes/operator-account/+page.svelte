@@ -14,9 +14,7 @@
 		mapOperatorTypeToLabel,
 		titleCase,
 		utcToIstFormat,
-
 		getLoggedInUserId
-
 	} from '$lib/helpers';
 	import { page } from '$app/stores';
 	import FloatingAddButton from '$lib/components/FloatingAddButton.svelte';
@@ -211,7 +209,7 @@
 				: Array.isArray((apiData as any)?.data)
 					? (apiData as any).data
 					: [];
-const loggedInUserId = getLoggedInUserId()
+			const loggedInUserId = getLoggedInUserId();
 			formattedOperatorData = items.map((item: any) => ({
 				id: item.id ? `OPR-${item.id}` : '',
 				apiId: item.id ?? null,
@@ -595,12 +593,7 @@ const loggedInUserId = getLoggedInUserId()
 		</div>
 		<main class="container-xl py-5 page-wrapper">
 			<!-- HOME BUTTON -->
-			<HomeButton
-				icon="bi bi-arrow-left"
-				ariaLabel="Back"
-				to="/company/dashboard"
-				preserveQuery={true}
-			/>
+			<HomeButton icon="bi bi-arrow-left" ariaLabel="Back" to="/dashboard" preserveQuery={true} />
 			<!-- PAGE HEADER -->
 			<ListingPageHeader
 				title="Operator Account Management"
