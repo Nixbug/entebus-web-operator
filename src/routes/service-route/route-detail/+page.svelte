@@ -31,7 +31,7 @@
 
 	//-- Get route ID from URL --
 	let routeId: string | null = null;
-	$: routeId = $page.url.searchParams.get('routeId') ?? null;
+	$: routeId = $page.url.searchParams.get('id') ?? null;
 
 	//-- Loading state --
 	let loading = false;
