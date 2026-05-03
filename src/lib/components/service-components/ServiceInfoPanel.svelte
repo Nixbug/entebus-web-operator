@@ -10,9 +10,6 @@
 	//-- Props --
 	export let service: ServiceDetail;
 	export let landmarks: Landmark[] = [];
-	export let companyId: string | null = null;
-	export let companyName: string | null = null;
-	export let companyStatus: string | null = null;
 
 	let isEditing = false;
 
@@ -62,10 +59,7 @@
 		const params = new URLSearchParams();
 		params.set('serviceId', String(service.id));
 		params.set('serviceName', service.name);
-		if (companyId) params.set('companyId', companyId);
-		if (companyName) params.set('name', companyName);
-		if (companyStatus) params.set('status', companyStatus);
-		goto(`/company/company-services/duty?${params.toString()}`);
+		goto(`/company-services/duty?${params.toString()}`);
 	}
 </script>
 
