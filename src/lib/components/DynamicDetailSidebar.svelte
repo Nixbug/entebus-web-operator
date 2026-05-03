@@ -6,7 +6,6 @@
 	import CustomSelect from './CustomSelect.svelte';
 	import SearchableDropdown from './SearchableDropdown.svelte';
 	import DeleteConfirmationModal from './DeleteConfirmationModal.svelte';
-	import BusStopsSection from './landmark-busstop-components/BusStopsSection.svelte';
 	import { MOBILE_BREAKPOINT } from '$lib/constants';
 	import { createEventDispatcher } from 'svelte';
 	import { onMount, onDestroy } from 'svelte';
@@ -57,9 +56,6 @@
 	export let hasUpdatePermission: boolean = true;
 	export let deleteConfirmationLabel: string = '';
 	export let deleteConfirmationValue: string = '';
-	export let hasBusStopEditPermission: boolean = true;
-	export let hasBusStopDeletePermission: boolean = true;
-	export let hasBusStopCreatePermission: boolean = true;
 
 	//-- Normalize date fields to YYYY-MM-DD for <input type="date"> compatibility --
 	//-- Uses local timezone to avoid ±1 day shift that toISOString() (UTC) can cause --
@@ -364,13 +360,6 @@
 		if (!data || !data.apiId) return;
 		const vehicleId = Number(data.apiId);
 		if (!vehicleId) return;
-		const companyId =
-			(data as any).company_id ?? (data as any).companyId ?? (data as any).company?.id ?? null;
-		if (!companyId) {
-			console.error('Cannot upload image: company id not available');
-			return;
-		}
-
 		try {
 			avatarData = { ...avatarData, imageLoading: true };
 			try {
@@ -413,7 +402,7 @@
 				console.warn('Failed to check existing images before upload', e);
 			}
 			//-- Proceed with upload --
-			await uploadVehicleImage(file, vehicleId, Number(companyId));
+			await uploadVehicleImage(file, vehicleId);
 			try {
 				clearVehicleImageCache(vehicleId);
 			} catch (e) {

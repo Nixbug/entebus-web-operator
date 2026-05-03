@@ -165,12 +165,10 @@ export async function deleteVehicleImage(id: number): Promise<void> {
 export async function uploadVehicleImage(
 	file: File,
 	vehicle_id: number,
-	company_id: number
 ): Promise<any> {
 	const form = new FormData();
 	form.append('file', file);
 	form.append('vehicle_id', String(vehicle_id));
-	form.append('company_id', String(company_id));
 
 	const res = await apiFetch<any>('POST', '/company/vehicle/picture', {
 		contentType: 'multipart',
