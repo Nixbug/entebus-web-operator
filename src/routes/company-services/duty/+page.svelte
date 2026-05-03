@@ -25,6 +25,7 @@
 	import type { DetailConfig } from '$lib/types/detail-config';
 	import type { Duty } from '$lib/types/type';
 	import { canUpdateDuty } from '$lib/utils/permissions';
+	import { goto } from '$app/navigation';
 
 	//-- Filter to a specific service's duties (from service detail page) --
 	let serviceIdFilter: number | undefined = undefined;
@@ -56,10 +57,17 @@
 
 	function openDetail(row: Duty) {
 		selected = row;
-		detailConfig = getDutyDetailConfig(row);
+		detailConfig = getDutyDetailConfig(row, () => navigateToTickets(row));
 		showDetail = true;
 	}
-
+	function navigateToTickets(duty: Duty) {
+		const params = new URLSearchParams();
+		if (duty.apiId) params.set('dutyId', String(duty.apiId));
+		if (serviceIdFilter) params.set('serviceId', String(serviceIdFilter));
+		if (serviceNameFilter) params.set('serviceName', serviceNameFilter);
+		params.set('dutyDisplayId', duty.id);
+		goto(`/company-services/duty/paper-ticket?${params.toString()}`);
+	}
 	//-- Valid state transitions — imported from constants (single source of truth shared with duty-detail.config.ts) --
 
 	//-- Update duty status --
