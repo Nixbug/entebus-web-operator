@@ -106,6 +106,15 @@
 	let errors: Record<string, string> = {};
 	let isSubmitting = false;
 
+	//-- Extract custom actions from config for avatar card --
+	$: customActionsForAvatar = (config.actions?.custom ?? []).map((action) => ({
+		label: action.label,
+		icon: action.icon,
+		color: action.color,
+		action: action.action
+	}));
+
+
 	//-- Validate a single field --
 	function validateField(field: DetailField, value: any): string | null {
 		const stringValue = value?.toString() || '';
@@ -519,6 +528,7 @@
 					imageLoading?: boolean;
 				}}
 				editable={sectionName === 'vehicle' && hasUpdatePermission}
+				customActions={customActionsForAvatar}
 				on:fileSelected={(e) => handleAvatarFile(e.detail.file)}
 			/>
 		{/if}

@@ -39,7 +39,6 @@ export function hasPermission(path: string): boolean {
 
 /** Specific convenience checks */
 
-
 //-- company operator permissions --
 export function canCreateCompanyOperator(): boolean {
 	return hasPermission('company.operator.create');
@@ -100,6 +99,12 @@ export function canDeleteRoute(): boolean {
 //-- Service permissions --
 export function canCreateService(): boolean {
 	return hasPermission('company.service.create');
+}
+export function canUpdateService(): boolean {
+	return hasPermission('company.service.update');
+}
+export function canDeleteService(): boolean {
+	return hasPermission('company.service.delete');
 }
 
 //-- service assignment permissions --
