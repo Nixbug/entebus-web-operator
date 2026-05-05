@@ -95,7 +95,8 @@
 			const result = await fetchVehicleList({
 				search: q,
 				limit,
-				offset
+				offset,
+				status: 2
 			});
 			if (!Array.isArray(result)) return [];
 			return result.map((v: any) => ({ id: Number(v.id), name: String(v.name) }));

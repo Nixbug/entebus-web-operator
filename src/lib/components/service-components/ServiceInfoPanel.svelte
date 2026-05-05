@@ -55,6 +55,7 @@
 	$: canUpdate = canUpdateService();
 	$: canDelete = canDeleteService();
 	$: canDeleteNow = canDelete && service.status === SERVICE_STATUS.CREATED;
+	$: isCreatedStatus = service.status === SERVICE_STATUS.CREATED;
 
 	//-- Derived static display values --
 	$: startLandmark = landmarks.find((l) => l.apiId === service?.startingLandmarkId);
@@ -110,7 +111,9 @@
 			ticketMode: service.ticketMode,
 			status: service.status,
 			remark: service.remark ?? '',
-			startingAt: service.startingAt
+			startingAt: service.startingAt,
+			startingLandmarkId: service.startingLandmarkId,
+			endingLandmarkId: service.endingLandmarkId
 		});
 	}
 
@@ -386,8 +389,10 @@
 
 	//-- Date helpers (for Today/Tomorrow chips) --
 	function todayDateString(): string {
-		const d = new Date();
-		return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+		const nowUtc = new Date();
+		const istOffsetMs = (5 * 60 + 30) * 60 * 1000;
+		const nowIst = new Date(nowUtc.getTime() + istOffsetMs);
+		return `${nowIst.getUTCFullYear()}-${String(nowIst.getUTCMonth() + 1).padStart(2, '0')}-${String(nowIst.getUTCDate()).padStart(2, '0')}`;
 	}
 	function addDays(dateStr: string, days: number): string {
 		const [y, m, d] = dateStr.split('-').map(Number);
@@ -399,6 +404,12 @@
 
 	//-- Cancel: reset all fields to original, restore timeline via event --
 	function handleCancel() {
+		//-- Clear any pending auto-generate and invalidate in-flight requests --
+		if (autoGenerateTimer) {
+			clearTimeout(autoGenerateTimer as any);
+			autoGenerateTimer = null;
+		}
+		latestGenId++;
 		selectedVehicleId = origVehicleId;
 		selectedFareId = origFareId;
 		selectedRouteId = '';
@@ -473,6 +484,8 @@
 				loadOptions={loadVehicles ?? (() => Promise.resolve([]))}
 				value={selectedVehicleId}
 				initialLabel={service.vehicle.name}
+				disabled={!isCreatedStatus}
+				disabledMessage="Not allowed - only services in Created status can change vehicle"
 				onChange={(v) => {
 					selectedVehicleId = v;
 				}}
@@ -492,6 +505,8 @@
 				loadOptions={loadRoutesForDropdown}
 				value={selectedRouteId}
 				initialLabel={routeLabel}
+				disabled={!isCreatedStatus}
+				disabledMessage="Not allowed - only services in Created status can change route"
 				onChange={(v) => {
 					selectedRouteId = v;
 					triggerTimeline();
@@ -512,6 +527,8 @@
 				loadOptions={loadFares ?? (() => Promise.resolve([]))}
 				value={selectedFareId}
 				initialLabel={service.fare.name}
+				disabled={!isCreatedStatus}
+				disabledMessage="Not allowed - only services in Created status can change fare"
 				onChange={(v) => {
 					selectedFareId = v;
 					triggerTimeline();
@@ -527,12 +544,16 @@
 				</span>
 				Starting at <span class="hint">(IST · for timeline preview)</span>
 			</p>
-			<div class="datetime-row">
+			<div class="datetime-row" class:disabled-section={!isCreatedStatus}>
 				<div class="date-options">
 					<button
 						type="button"
 						class="date-chip"
 						class:selected={startingDate === dateToday}
+						disabled={!isCreatedStatus}
+						title={!isCreatedStatus
+							? 'Not allowed - only services in Created status can change start date/time'
+							: undefined}
 						on:click={() => {
 							startingDate = dateToday;
 							triggerTimeline();
@@ -550,6 +571,10 @@
 						type="button"
 						class="date-chip"
 						class:selected={startingDate === dateTomorrow}
+						disabled={!isCreatedStatus}
+						title={!isCreatedStatus
+							? 'Not allowed - only services in Created status can change start date/time'
+							: undefined}
 						on:click={() => {
 							startingDate = dateTomorrow;
 							triggerTimeline();
@@ -564,7 +589,15 @@
 						>
 					</button>
 					{#if startingDate !== dateToday && startingDate !== dateTomorrow}
-						<button type="button" class="date-chip selected" on:click={() => {}}>
+						<button
+							type="button"
+							class="date-chip selected"
+							disabled={!isCreatedStatus}
+							title={!isCreatedStatus
+								? 'Not allowed - only services in Created status can change start date/time'
+								: undefined}
+							on:click={() => {}}
+						>
 							<span class="date-label">Service date</span>
 							<span class="date-sub"
 								>{new Date(startingDate + 'T00:00:00').toLocaleDateString(undefined, {
@@ -576,7 +609,13 @@
 					{/if}
 				</div>
 			</div>
-			<div class="time-selector-row">
+			<div
+				class="time-selector-row"
+				class:disabled-section={!isCreatedStatus}
+				title={!isCreatedStatus
+					? 'Not allowed - only services in Created status can change start date/time'
+					: undefined}
+			>
 				<TimeSelector
 					bind:value={timeSelection}
 					showDays={false}
@@ -856,6 +895,14 @@
 		transform: translateY(-1px);
 	}
 
+	.date-chip:disabled:hover,
+	.date-chip[disabled]:hover {
+		opacity: 0.45;
+		transform: none;
+		border-color: var(--delete-btn, #dc3545);
+		background: rgba(220, 53, 69, 0.08);
+	}
+
 	.date-chip.selected {
 		opacity: 1;
 		font-weight: 600;
@@ -875,6 +922,21 @@
 
 	.time-selector-row {
 		margin-top: 0.5rem;
+	}
+	.disabled-section {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.time-selector-row.disabled-section {
+		pointer-events: none;
+	}
+
+	.date-chip:disabled,
+	.date-chip[disabled] {
+		opacity: 0.45;
+		cursor: not-allowed;
+		background: var(--bg-primary);
 	}
 
 	/* ── Ticket mode chips ── */
