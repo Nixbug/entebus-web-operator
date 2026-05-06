@@ -196,7 +196,7 @@ export function getLoggedInUserId(): number | null {
 
 	if (!token) return null;
 
-	const id = token.executive_id ?? token.executiveId ?? token.id;
+	const id = token.operator_id ?? token.id ?? null;
 	if (typeof id === 'number') return id;
 	if (typeof id === 'string' && /^\d+$/.test(id)) return Number(id);
 	return null;

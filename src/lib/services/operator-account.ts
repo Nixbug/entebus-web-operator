@@ -15,6 +15,7 @@ export type UpdateOperatorAccountResponse =
 export type DeleteOperatorAccountResponse = null;
 //-- Fetch Operator Account --
 export async function fetchOperatorAccount({
+	id,
 	search,
 	gender,
 	status,
@@ -24,6 +25,7 @@ export async function fetchOperatorAccount({
 	offset,
 	id_list
 }: {
+	id?: number;
 	search?: string;
 	gender?: number;
 	status?: number;
@@ -34,6 +36,7 @@ export async function fetchOperatorAccount({
 	id_list?: number[];
 } = {}): Promise<FetchOperatorAccountResponse> {
 	const params = new URLSearchParams();
+	if (id !== undefined) params.append('id', String(id));
 	if (search) params.append('search', search);
 	if (gender !== undefined) params.append('gender', String(gender));
 	if (status !== undefined) params.append('status_list', String(status));
