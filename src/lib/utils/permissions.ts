@@ -38,7 +38,10 @@ export function hasPermission(path: string): boolean {
 }
 
 /** Specific convenience checks */
-
+//--company permissions --
+export function canUpdateCompany(): boolean {
+	return hasPermission('company.update');
+}
 //-- company operator permissions --
 export function canCreateCompanyOperator(): boolean {
 	return hasPermission('company.operator.create');

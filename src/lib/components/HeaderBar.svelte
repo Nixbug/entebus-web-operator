@@ -188,10 +188,11 @@
 							<p class="small mb-0">john@entebus.com</p>
 						</li>
 						<hr class="my-2" />
-						<li class="px-3 pb-2">
+						<li class="px-3  pb-2">
 							<a href="/user-profile" class="btn btn-light w-100 fw-medium border"
 								>Account Settings</a
 							>
+							<a href="/company-profile" class="btn btn-light mt-2 fw-medium w-100">Company Profile</a>
 						</li>
 						<li class="px-3 pb-3">
 							<button class="btn btn-outline-danger w-100 fw-medium" on:click={openLogoutConfirm}>
@@ -259,6 +260,7 @@
 
 			<div class="d-flex flex-column gap-2 mb-3">
 				<a href="/user-profile" class="btn btn-outline-primary fw-medium w-100">Account Settings</a>
+				<a href="/company-profile" class="btn btn-outline-primary mt-2 fw-medium w-100">Company Profile</a>
 				<button class="btn btn-danger fw-medium w-100" on:click={openLogoutConfirm}>Logout</button>
 			</div>
 

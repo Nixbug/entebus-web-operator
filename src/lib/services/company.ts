@@ -4,10 +4,15 @@ import type { operations } from '$lib/api/types';
 
 export type companyGetResponse =
 	operations['fetch_company_operator_company_get']['responses']['200']['content']['application/json'];
+export type companyUpdateRequest =
+	operations['update_company_operator_company__id__patch']['requestBody']['content']['application/json'];
+export type companyUpdateResponse =
+	operations['update_company_operator_company__id__patch']['responses']['200']['content']['application/json'];
 
 // Public base: strips /operator to hit https://dev-api.entebus.com/public/company
 const PUBLIC_COMPANY_BASE = API_BASE_URL.replace(/\/operator$/, '') + '/public/company';
 
+//-- Fetch a company account from public API --
 export async function fetchCompanyAccount({
 	id,
 	search,
@@ -48,4 +53,34 @@ export async function fetchCompanyAccount({
 	const res = await apiFetch<companyGetResponse>('GET', url);
 	if (!res.ok) throw res;
 	return res.data ?? [];
+}
+
+//-- Fetch a company account by its ID --
+export async function fetchOperatorCompany({
+	offset
+}: {
+	offset?: number;
+} = {}): Promise<companyGetResponse> {
+	const params = new URLSearchParams();
+	if (offset !== undefined) params.append('offset', String(offset));
+
+	const query = params.toString();
+	const url = `/company${query ? `?${query}` : ''}`;
+
+	const res = await apiFetch<companyGetResponse>('GET', url);
+	if (!res.ok) throw res;
+	return res.data ?? [];
+}
+//-- Update a company account by its ID --
+export async function updateCompany(
+	id: number,
+	payload: companyUpdateRequest
+): Promise<companyUpdateResponse> {
+	const url = `/company/${encodeURIComponent(String(id))}`;
+	const res = await apiFetch<companyUpdateResponse>('PATCH', url, {
+		body: payload,
+		contentType: 'json'
+	});
+	if (!res.ok) throw res;
+	return res.data as companyUpdateResponse;
 }
