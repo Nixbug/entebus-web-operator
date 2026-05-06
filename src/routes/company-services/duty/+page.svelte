@@ -141,7 +141,7 @@
 					? (serviceNameMap.get(Number(duty.service_id)) ?? `Service #${duty.service_id}`)
 					: '—',
 				statusLabel: mapDutyStatusToLabel(duty.status),
-				collection: duty.collection,
+				collection: duty.collection ?? 'duty not ended',
 				startedOn: utcToIstFormat(duty.started_on),
 				finishedOn: utcToIstFormat(duty.finished_on),
 				createdAt: utcToIstFormat(duty.created_on),
@@ -289,8 +289,7 @@
 		{ key: 'statusLabel', label: 'Status', isChip: true }
 	];
 	const optionalColumns = [
-		{ key: 'collection', label: 'Collection' },
-
+		{key:'collection', label:'Collection'},
 		{ key: 'finishedOn', label: 'Finished On' },
 		{ key: 'createdAt', label: 'Created At' },
 		{ key: 'updatedAt', label: 'Updated At' }

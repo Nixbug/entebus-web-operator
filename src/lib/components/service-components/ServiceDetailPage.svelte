@@ -27,6 +27,7 @@
 	//-- detail mode: data passed from +page.svelte --
 	export let service: ServiceDetail | null = null;
 	export let landmarks: Landmark[] = [];
+	export let totalCollection: number | null = null;
 
 	//-- detail mode: operator assignment API functions --
 	export let loadOperators: (
@@ -222,6 +223,7 @@
 			<ServiceInfoPanel
 				{service}
 				{landmarks}
+				totalCollection={totalCollection}
 				loadVehicles={loadVehiclesForPanel}
 				loadFares={loadFaresForPanel}
 				on:preview={handlePreview}

@@ -2,6 +2,7 @@
 	import ServiceDetailPage from '$lib/components/service-components/ServiceDetailPage.svelte';
 	import type { ServiceDetail, Landmark } from '$lib/types/type';
 	import { fetchServiceDetail } from '$lib/services/company-services';
+	import { fetchDutyList } from '$lib/services/service-duty';
 	import { fetchLandmarkList } from '$lib/services/landmark';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
@@ -20,6 +21,7 @@
 	let loading = true;
 	let error: string | null = null;
 	let loadedServiceId: number | null = null;
+	let totalCollection: number | null = null;
 
 	$: serviceId = Number($page.url.searchParams.get('id'));
 
@@ -90,6 +92,22 @@
 		try {
 			const raw = await fetchServiceDetail(id);
 			service = mapService(raw);
+
+			//-- Load duties for this service and sum their collection values (if present)
+			try {
+				const duties = await fetchDutyList({ service_id: id, limit: 100 });
+				if (Array.isArray(duties)) {
+					totalCollection = duties.reduce((acc: number, d: any) => {
+						const v = Number(d.collection);
+						return acc + (Number.isFinite(v) ? v : 0);
+					}, 0);
+				} else {
+					totalCollection = 0;
+				}
+			} catch (e) {
+				console.warn('Failed to load duties for collection sum:', e);
+				totalCollection = null;
+			}
 
 			const landmarkIds = service.route.map((r: any) => r.landmarkId);
 			if (landmarkIds.length > 0) {
@@ -213,6 +231,7 @@
 				<ServiceDetailPage
 					{service}
 					{landmarks}
+					totalCollection={totalCollection}
 					{loadOperators}
 					{assignOperator}
 					{unassignOperator}
