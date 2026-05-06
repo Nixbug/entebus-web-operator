@@ -119,7 +119,7 @@
 				<img src={enteBuslogo} alt="EnteBus" />
 			</div>
 
-			<span class="mb-0 fw-inter-700 app-title rounded">EnteBus Executive</span>
+			<span class="mb-0 fw-inter-700 app-title rounded">EnteBus Operator</span>
 		</div>
 		<!-- Right -->
 		<div class="d-flex align-items-center gap-3">
