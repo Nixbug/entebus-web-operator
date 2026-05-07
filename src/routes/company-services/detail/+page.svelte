@@ -24,6 +24,9 @@
 	let totalCollection: number | null = null;
 
 	$: serviceId = Number($page.url.searchParams.get('id'));
+	$: referrer = $page.url.searchParams.get('from');
+	$: referrerFromDate = $page.url.searchParams.get('from_date');
+	$: referrerToDate = $page.url.searchParams.get('to_date');
 
 	//-- Map raw snake_case API response → camelCase ServiceDetail --
 	function mapService(raw: any): ServiceDetail {
@@ -206,7 +209,11 @@
 			<HeaderBar />
 		</div>
 		<main class="container-xl py-5 page-wrapper">
-			<HomeButton icon="bi bi-arrow-left" ariaLabel="Back to services" to="/company-services" />
+			<HomeButton
+				icon="bi bi-arrow-left"
+				ariaLabel={referrer === 'report' ? 'Back to service report' : 'Back to services'}
+				to={referrer === 'report' ? `/service-report?from=${referrerFromDate}&to=${referrerToDate}` : '/company-services'}
+			/>
 
 			<ListingPageHeader
 				title="Service Detail"

@@ -9,7 +9,8 @@
 		getInitialVisibleColumns,
 		utcToIstFormat,
 		mapServiceTicketModeToLabel,
-		mapServiceStatusToLabel
+		mapServiceStatusToLabel,
+		utcToIstRelativeFormat
 	} from '$lib/helpers';
 	import FloatingAddButton from '$lib/components/FloatingAddButton.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
@@ -29,6 +30,23 @@
 	import { canCreateService } from '$lib/utils/permissions';
 
 	const canCreate = canCreateService();
+
+	//-- IST date helpers --
+	function todayIst(): string {
+		const now = new Date();
+		const ist = new Date(now.getTime() + (5 * 60 + 30) * 60_000);
+		return `${ist.getUTCFullYear()}-${String(ist.getUTCMonth() + 1).padStart(2, '0')}-${String(ist.getUTCDate()).padStart(2, '0')}`;
+	}
+	function toUtcStartOfIstDay(date: string): string {
+		return new Date(`${date}T00:00:00+05:30`).toISOString();
+	}
+	function toUtcEndOfIstDay(date: string): string {
+		return new Date(`${date}T23:59:59+05:30`).toISOString();
+	}
+
+	//-- Date range state — default: today --
+	let fromDate = todayIst();
+	let toDate = todayIst();
 
 	//-- Pagination setup --
 	let currentPage = 1;
@@ -61,7 +79,11 @@
 				status: statusFilter,
 				ticket_mode: ticketModeFilter,
 				limit: itemsPerPage,
-				offset: (currentPage - 1) * itemsPerPage
+				offset: (currentPage - 1) * itemsPerPage,
+				starting_at_ge: fromDate ? toUtcStartOfIstDay(fromDate) : undefined,
+				starting_at_le: toDate ? toUtcEndOfIstDay(toDate) : undefined,
+				order_by: 'starting_at',
+				order_in: 'desc'
 			});
 
 			if (currentRequestId !== requestId) return;
@@ -74,7 +96,7 @@
 						apiId: service.id ?? null,
 						statusLabel: mapServiceStatusToLabel(service.status),
 						ticketModeLabel: mapServiceTicketModeToLabel(service.ticket_mode),
-						startingAt: utcToIstFormat(service.starting_at ?? service.startingAt ?? ''),
+						startingAt: utcToIstRelativeFormat(service.starting_at ?? service.startingAt ?? ''),
 						createdAt: utcToIstFormat(service.created_on ?? service.createdAt ?? ''),
 						updatedAt: utcToIstFormat(service.updated_on ?? service.updatedAt ?? '')
 					}) as Service
@@ -198,6 +220,38 @@
 				isInitiallyEnabled={canCreate}
 				disabledTooltip="You do not have permission to create services."
 			/>
+			<!-- DATE FILTER BAR -->
+			<div class="svc-date-filter-bar">
+				<div class="svc-date-field">
+					<label class="svc-date-label" for="svc-from-date">From</label>
+					<input
+						id="svc-from-date"
+						class="svc-date-input"
+						type="date"
+						bind:value={fromDate}
+						max={toDate}
+						on:change={() => {
+							currentPage = 1;
+							fetchServices();
+						}}
+					/>
+				</div>
+				<span class="svc-date-sep">→</span>
+				<div class="svc-date-field">
+					<label class="svc-date-label" for="svc-to-date">To</label>
+					<input
+						id="svc-to-date"
+						class="svc-date-input"
+						type="date"
+						bind:value={toDate}
+						min={fromDate}
+						on:change={() => {
+							currentPage = 1;
+							fetchServices();
+						}}
+					/>
+				</div>
+			</div>
 			<!-- SEARCH & FILTER BAR -->
 			<SearchFilterBar
 				searchPlaceholder="Search by name or ID..."
@@ -280,6 +334,46 @@
 	.main-div {
 		background-color: var(--bg-primary);
 		position: relative;
+	}
+
+	/* Date filter bar — right-aligned, below SearchFilterBar */
+	.svc-date-filter-bar {
+		display: flex;
+		align-items: flex-end;
+		justify-content: flex-start;
+		gap: 12px;
+		margin-bottom: 1rem;
+	}
+	.svc-date-field {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+	.svc-date-label {
+		font-size: 11px;
+		font-weight: 600;
+		color: var(--text-muted);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+	}
+	.svc-date-input {
+		height: 42px;
+		padding: 0 12px;
+		border: 1px solid var(--border);
+		border-radius: 8px;
+		background: var(--bg-card);
+		color: var(--text-primary);
+		font-size: 13px;
+		outline: none;
+	}
+	.svc-date-input:focus {
+		border-color: var(--edit-btn);
+	}
+	.svc-date-sep {
+		font-size: 19px;
+		font-weight: 500;
+		color: var(--text-muted);
+		padding-bottom: 4px;
 	}
 	@media (max-width: 768px) {
 		main {

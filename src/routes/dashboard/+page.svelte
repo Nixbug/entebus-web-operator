@@ -44,6 +44,13 @@
 			icon: 'bi bi-person-badge-fill',
 			color: '#F87171',
 			href: '/company-services'
+		},
+		{
+			title: 'Reports',
+			description: 'View operational reports',
+			icon: 'bi bi-bar-chart-fill',
+			color: '#3B82F6',
+			href: '/service-report'
 		}
 	];
 </script>
