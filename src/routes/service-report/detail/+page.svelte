@@ -158,16 +158,12 @@
 			const services = await fetchAllServices(serviceIds);
 
 			//-- Fetch duties for each service in parallel --
-			const dutiesPerService = await Promise.all(
-				serviceIds.map((sid) => fetchAllDuties(sid))
-			);
+			const dutiesPerService = await Promise.all(serviceIds.map((sid) => fetchAllDuties(sid)));
 
 			//-- Build report rows --
 			rows = serviceIds
 				.map((sid, idx) => {
-					const svc = Array.isArray(services)
-						? services.find((s: any) => s.id === sid)
-						: null;
+					const svc = Array.isArray(services) ? services.find((s: any) => s.id === sid) : null;
 					if (!svc) return null;
 
 					const duties = dutiesPerService[idx] ?? [];
@@ -302,7 +298,9 @@
 					<div class="report-meta">
 						<div class="meta-row">
 							<span class="meta-label">Period</span>
-							<span class="meta-value">{formatDisplayDate(fromDate)} — {formatDisplayDate(toDate)}</span>
+							<span class="meta-value"
+								>{formatDisplayDate(fromDate)} — {formatDisplayDate(toDate)}</span
+							>
 						</div>
 						<div class="meta-row">
 							<span class="meta-label">Services</span>
@@ -316,7 +314,6 @@
 				</div>
 
 				<div class="report-divider"></div>
-
 
 				<!-- Service-wise breakdown (full width) -->
 				<div class="table-section">
@@ -347,7 +344,9 @@
 										<td>
 											<span
 												class="status-chip"
-												style="background:{statusColor(row.status)}1a; color:{statusColor(row.status)}; border:1px solid {statusColor(row.status)}44;"
+												style="background:{statusColor(row.status)}1a; color:{statusColor(
+													row.status
+												)}; border:1px solid {statusColor(row.status)}44;"
 											>
 												{statusLabel(row.status)}
 											</span>
@@ -378,65 +377,72 @@
 				</div>
 
 				{#if operatorRows.length > 0}
-				<!-- Bottom row: operator table + summary info panel side by side -->
-				<div class="tables-row">
-					<!-- Operator-wise breakdown -->
-					<div class="table-section table-section--operator">
-						<h2 class="section-title">Operator-wise Collection</h2>
-						<div class="report-table-wrap">
-							<table class="report-table">
-								<thead>
-									<tr>
-										<th>#</th>
-										<th>Operator</th>
-										<th class="col-duties">Duties</th>
-										<th class="col-amount">Collection (₹)</th>
-									</tr>
-								</thead>
-								<tbody>
-									{#each operatorRows as op, i (op.operator_id)}
+					<!-- Bottom row: operator table + summary info panel side by side -->
+					<div class="tables-row">
+						<!-- Operator-wise breakdown -->
+						<div class="table-section table-section--operator">
+							<h2 class="section-title">Operator-wise Collection</h2>
+							<div class="report-table-wrap">
+								<table class="report-table">
+									<thead>
 										<tr>
-											<td class="cell-num">{i + 1}</td>
-											<td>
-												<p class="op-name">{op.name}</p>
-												<p class="op-id">ID #{op.operator_id}</p>
-											</td>
-											<td class="cell-duties">{op.duty_count}</td>
-											<td class="cell-amount">{formatCurrency(op.total_collection)}</td>
+											<th>#</th>
+											<th>Operator</th>
+											<th class="col-duties">Duties</th>
+											<th class="col-amount">Collection (₹)</th>
 										</tr>
-									{/each}
-								</tbody>
-								<tfoot>
-									<tr class="total-row">
-										<td colspan="2" class="total-label">Total</td>
-										<td class="cell-duties">{operatorRows.reduce((s, r) => s + r.duty_count, 0)}</td>
-										<td class="cell-amount total-amount">{formatCurrency(operatorRows.reduce((s, r) => s + r.total_collection, 0))}</td>
-									</tr>
-								</tfoot>
-							</table>
+									</thead>
+									<tbody>
+										{#each operatorRows as op, i (op.operator_id)}
+											<tr>
+												<td class="cell-num">{i + 1}</td>
+												<td>
+													<p class="op-name">{op.name}</p>
+													<p class="op-id">ID #{op.operator_id}</p>
+												</td>
+												<td class="cell-duties">{op.duty_count}</td>
+												<td class="cell-amount">{formatCurrency(op.total_collection)}</td>
+											</tr>
+										{/each}
+									</tbody>
+									<tfoot>
+										<tr class="total-row">
+											<td colspan="2" class="total-label">Total</td>
+											<td class="cell-duties"
+												>{operatorRows.reduce((s, r) => s + r.duty_count, 0)}</td
+											>
+											<td class="cell-amount total-amount"
+												>{formatCurrency(
+													operatorRows.reduce((s, r) => s + r.total_collection, 0)
+												)}</td
+											>
+										</tr>
+									</tfoot>
+								</table>
+							</div>
 						</div>
-					</div>
 
-					<!-- Summary info panel (fills remaining space) -->
-					<div class="summary-side">
-						<div class="summary-card highlight">
-							<p class="sum-label">Grand Collection</p>
-							<p class="sum-value">{formatCurrency(grandTotal)}</p>
-						</div>
-						<div class="summary-card">
-							<p class="sum-label">Total Duties</p>
-							<p class="sum-value">{totalDuties}</p>
-						</div>
-						<div class="summary-card">
-							<p class="sum-label">Total Services</p>
-							<p class="sum-value">{rows.length}</p>
+						<!-- Summary info panel (fills remaining space) -->
+						<div class="summary-side">
+							<div class="summary-card highlight">
+								<p class="sum-label">Grand Collection</p>
+								<p class="sum-value">{formatCurrency(grandTotal)}</p>
+							</div>
+							<div class="summary-card">
+								<p class="sum-label">Total Duties</p>
+								<p class="sum-value">{totalDuties}</p>
+							</div>
+							<div class="summary-card">
+								<p class="sum-label">Total Services</p>
+								<p class="sum-value">{rows.length}</p>
+							</div>
 						</div>
 					</div>
-				</div>
 				{/if}
 
 				<!-- Report footer -->
-				<div class="report-footer">					<p>This is a system-generated report. No signature required.</p>
+				<div class="report-footer">
+					<p>This is a system-generated report. No signature required.</p>
 					<p>Generated on {generatedAt} (IST)</p>
 				</div>
 			</div>
@@ -582,13 +588,6 @@
 		margin-bottom: 1.5rem;
 	}
 
-	/* Summary cards */
-	.summary-grid {
-		display: grid;
-		grid-template-columns: repeat(3, 1fr);
-		gap: 12px;
-		margin-bottom: 2rem;
-	}
 	.summary-card {
 		background: var(--bg-primary);
 		border: 1px solid var(--border);
@@ -657,6 +656,12 @@
 		font-size: 11px;
 		color: var(--text-muted);
 	}
+	.report-table-wrap {
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		border-radius: 8px;
+	}
+
 	.report-table {
 		width: 100%;
 		border-collapse: collapse;
@@ -834,12 +839,6 @@
 		}
 		.meta-row {
 			justify-content: flex-start;
-		}
-		.summary-grid {
-			grid-template-columns: 1fr 1fr;
-		}
-		.summary-grid .summary-card:last-child {
-			grid-column: span 2;
 		}
 		.tables-row {
 			flex-direction: column;
