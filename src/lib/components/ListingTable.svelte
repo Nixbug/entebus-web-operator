@@ -13,7 +13,12 @@
 	}
 
 	function display(value: unknown): string {
-		return isEmpty(value) ? '-' : String(value);
+		if (isEmpty(value)) return '-';
+		if (typeof value === 'string') {
+			if (value.length === 0) return '-';
+			return value.charAt(0).toUpperCase() + value.slice(1);
+		}
+		return String(value);
 	}
 </script>
 
