@@ -4,7 +4,7 @@
 	import toast from '$lib/utils/toast';
 
 	export let value: string = '';
-	export let initialLabel: string = '';
+	export let initialLabel: string = ''; // shown immediately while first page loads
 	export let onChange: (v: string) => void = () => {};
 	export let placeholder = 'Select item';
 	export let pageSize: number = 10;
@@ -45,14 +45,19 @@
 	$: if (value !== _lastSyncValue || initialLabel !== _lastSyncInitialLabel) {
 		_lastSyncValue = value;
 		_lastSyncInitialLabel = initialLabel;
-		const v = Number(value);
-		const found = items.find((item) => item.id === v);
-		if (found) {
-			query = found.name;
-			displaySelected = true;
-		} else if (initialLabel) {
-			query = initialLabel;
-			displaySelected = true;
+		if (value === '') {
+			query = '';
+			displaySelected = false;
+		} else {
+			const v = Number(value);
+			const found = items.find((item) => item.id === v);
+			if (found) {
+				query = found.name;
+				displaySelected = true;
+			} else if (initialLabel) {
+				query = initialLabel;
+				displaySelected = true;
+			}
 		}
 	}
 

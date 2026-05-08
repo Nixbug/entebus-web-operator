@@ -390,6 +390,7 @@
 	});
 
 	function handleCreate() {
+		if (nameError) return;
 		//-- Convert startingDate + startingTime (IST) to UTC ISO string --
 		const [hStr, mStr] = startingTime.split(':');
 		const [y, mo, d] = startingDate.split('-').map(Number);
@@ -566,7 +567,8 @@
 		<button
 			class="action-btn create-btn"
 			type="button"
-			disabled={!canCreate}
+			disabled={!canCreate || !!nameError}
+			title={nameError ? nameError : undefined}
 			on:click={handleCreate}
 		>
 			<i class="bi bi-plus-lg"></i> Create service

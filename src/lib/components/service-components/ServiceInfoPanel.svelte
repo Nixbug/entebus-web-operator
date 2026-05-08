@@ -459,6 +459,9 @@
 
 	//-- Save: send only API-supported fields --
 	function handleSave() {
+		if (nameError) {
+			return;
+		}
 		//-- Convert IST date/time back to ISO without using the browser's local timezone --
 		const [year, month, day] = startingDate.split('-').map(Number);
 		const [hour, minute] = startingTime.split(':').map(Number);
@@ -754,8 +757,12 @@
 			<button
 				class="action-btn save-btn"
 				type="button"
-				disabled={!canUpdate}
-				title={!canUpdate ? 'You do not have permission to update this service' : undefined}
+				disabled={!canUpdate || !!nameError}
+				title={nameError
+					? nameError
+					: !canUpdate
+						? 'You do not have permission to update this service'
+						: undefined}
 				on:click={handleSave}
 			>
 				<i class="bi bi-check2"></i>
