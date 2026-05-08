@@ -211,7 +211,7 @@
 								<i class="bi bi-person-circle" aria-hidden="true"></i>
 							</div>
 							<h6 class="fw-inter-700 mb-0">{titleCase(username)}</h6>
-							<p class="small mb-0">{titleCase(email)}</p>
+							<p class="small mb-0">({email})</p>
 						</li>
 						<hr class="my-2" />
 						<li class="px-3 pb-2">
@@ -287,7 +287,7 @@
 					<i class="bi bi-person-badge-fill" aria-hidden="true"></i>
 				</div>
 				<h6 class="fw-inter-700 mb-1">{titleCase(username)}</h6>
-				<p class="small mb-0">{titleCase(email)}</p>
+				<p class="small mb-0">({email})</p>
 			</div>
 
 			<div class="d-flex flex-column gap-2 mb-3">

@@ -12,8 +12,8 @@
 	} from '$lib/constants';
 	import FilterOnly from '$lib/components/FilterOnly.svelte';
 	import DateFilterComponent from '$lib/components/DateFilterComponent.svelte';
-	import { onMount } from 'svelte';
 	import { utcToIstRelativeFormat } from '$lib/helpers';
+	import { canUpdateService } from '$lib/utils/permissions';
 	//-- IST date helpers --
 	function todayIst(): string {
 		const now = new Date();
@@ -76,8 +76,6 @@
 			loading = false;
 		}
 	}
-
-	onMount(fetchServices);
 
 	$: if (fromDate && toDate && fromDate <= toDate) {
 		fetchServices();
@@ -143,6 +141,10 @@
 	let endingIds = new Set<number>();
 
 	async function endService(id: number) {
+		if (!canUpdateService()) {
+			toast.error('You do not have permission to end services.');
+			return;
+		}
 		endingIds = new Set([...endingIds, id]);
 		try {
 			await updateService(id, { status: 4 });
