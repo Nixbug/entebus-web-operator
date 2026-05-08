@@ -19,6 +19,7 @@
 	import { loginSchema } from '$lib/schemas';
 	import toast from '$lib/utils/toast';
 	import { writable } from 'svelte/store';
+	import { fetchOperatorAccount } from '$lib/services/operator-account';
 
 	type CompanyItem = Pick<components['schemas']['CompanySchema'], 'id' | 'name'>;
 
@@ -173,6 +174,25 @@
 			storeToken(token, rememberMe);
 			scheduleTokenRefresh(token);
 			await loadPermissions();
+			try {
+				const operatorId = token?.operator_id ?? getToken()?.operator_id;
+				if (operatorId) {
+					const profiles = await fetchOperatorAccount({ id: Number(operatorId) });
+					const profile = Array.isArray(profiles) ? profiles[0] : (profiles as any);
+					const fullname = profile?.full_name ?? profile?.username ?? '';
+					if (fullname) {
+						localStorage.setItem('fullname', fullname);
+						Store.storeData<string>('fullname', fullname);
+					}
+					const email = profile?.email_id ?? profile?.email ?? '';
+					if (email) {
+						localStorage.setItem('email', email);
+						Store.storeData<string>('email', email);
+					}
+				}
+			} catch (err) {
+				console.error('Failed to fetch executive profile after login:', err);
+			}
 			toast.success('User login successful!');
 			goto('/dashboard');
 		} catch (err: any) {
@@ -190,6 +210,25 @@
 				await loadPermissions();
 				const token = getToken();
 				if (token) scheduleTokenRefresh(token);
+				try {
+					const operatorId = token?.operator_id;
+					if (operatorId) {
+						const profiles = await fetchOperatorAccount({ id: Number(operatorId) });
+						const profile = Array.isArray(profiles) ? profiles[0] : (profiles as any);
+						const fullname = profile?.full_name ?? profile?.username ?? '';
+						if (fullname) {
+							localStorage.setItem('fullname', fullname);
+							Store.storeData<string>('fullname', fullname);
+						}
+						const email = profile?.email_id ?? profile?.email ?? '';
+						if (email) {
+							localStorage.setItem('email', email);
+							Store.storeData<string>('email', email);
+						}
+					}
+				} catch (err) {
+					console.error('Failed to fetch operator profile on mount:', err);
+				}
 				goto('/dashboard', { replaceState: true });
 			}
 		} catch (err) {

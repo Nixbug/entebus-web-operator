@@ -108,6 +108,21 @@
 	let remark = '';
 	let startingDate = '';
 	let startingTime = '';
+	let serviceName = '';
+	let nameError = '';
+
+	const NAME_PATTERN = /^[A-Za-z0-9](?:[A-Za-z0-9 _.-]*[A-Za-z0-9])?$/;
+
+	function validateName(value: string): string {
+		if (!value) return '';
+		if (!NAME_PATTERN.test(value)) {
+			return 'Service name must start and end with alphanumeric characters, and can contain spaces, underscores, dots, or dashes.';
+		}
+		return '';
+	}
+
+	$: nameError = validateName(serviceName);
+	$: nameChanged = serviceName !== origName;
 
 	//-- Original values for dirty detection — reactive, synced with service --
 	let origVehicleId = '';
@@ -117,10 +132,12 @@
 	let origRemark = '';
 	let origDate = '';
 	let origTime = '';
+	let origName = '';
 
 	//-- Capture service form state as a snapshot string --
 	function getServiceFormSnapshot(): string {
 		return JSON.stringify({
+			name: service.name,
 			vehicleId: String(service.vehicle.vehicleId),
 			fareId: String(service.fare.fareId),
 			ticketMode: service.ticketMode,
@@ -135,6 +152,7 @@
 	//-- Sync form state from service, resetting dirty detection baseline --
 	function syncFormStateFromService() {
 		const _initIst = isoToIst(service.startingAt);
+		serviceName = service.name;
 		selectedVehicleId = String(service.vehicle.vehicleId);
 		selectedFareId = String(service.fare.fareId);
 		selectedRouteId = '';
@@ -145,13 +163,13 @@
 		startingTime = _initIst.time;
 
 		//-- Reset baseline to match current state --
+		origName = serviceName;
 		origVehicleId = selectedVehicleId;
 		origFareId = selectedFareId;
 		origTicketMode = selectedTicketMode;
 		origStatus = selectedStatus;
 		origRemark = remark;
 		origDate = startingDate;
-		origTime = startingTime;
 	}
 
 	//-- Watch service changes and re-sync form state --
@@ -179,6 +197,7 @@
 	}));
 
 	$: isDirty =
+		serviceName !== origName ||
 		selectedVehicleId !== origVehicleId ||
 		selectedFareId !== origFareId ||
 		!!selectedRouteId ||
@@ -425,6 +444,7 @@
 			autoGenerateTimer = null;
 		}
 		latestGenId++;
+		serviceName = origName;
 		selectedVehicleId = origVehicleId;
 		selectedFareId = origFareId;
 		selectedRouteId = '';
@@ -448,10 +468,10 @@
 
 		dispatch('update', {
 			payload: {
+				name: serviceName,
 				ticket_mode: selectedTicketMode,
 				status: selectedStatus,
 				remark: remark.trim() || null,
-				// Temporary: include vehicle, route, fare, and timing for backend testing
 				vehicle_id: selectedVehicleId ? Number(selectedVehicleId) : undefined,
 				route_id: selectedRouteId ? Number(selectedRouteId) : undefined,
 				fare_id: selectedFareId ? Number(selectedFareId) : undefined,
@@ -494,6 +514,27 @@
 
 	<!-- Editable fields -->
 	<div class="fields">
+		<!--service name field with existing value also editable-->
+		<div class="field-group">
+			<p class="field-label">
+				<span class="ficon icon-name">
+					<i class="bi bi-pencil" aria-hidden="true" style="color:#534AB7"></i>
+				</span>
+				Service name
+			</p>
+			<input
+				type="text"
+				class="text-input"
+				class:input-error={nameChanged && nameError}
+				bind:value={serviceName}
+				disabled={!isCreatedStatus}
+				placeholder="Enter service name"
+			/>
+			{#if nameChanged && nameError}
+				<p class="field-error">{nameError}</p>
+			{/if}
+		</div>
+
 		<!-- Vehicle -->
 		<div class="field-group">
 			<p class="field-label">
@@ -646,7 +687,6 @@
 				/>
 			</div>
 		</div>
-
 		<!-- Ticket mode -->
 		<div class="field-group">
 			<p class="field-label">
@@ -707,6 +747,10 @@
 	<!-- Action bar -->
 	<div class="action-bar" class:is-dirty={isDirty}>
 		{#if isDirty}
+			<button class="action-btn cancel-btn" type="button" on:click={handleCancel}>
+				<i class="bi bi-x-lg"></i>
+				Cancel
+			</button>
 			<button
 				class="action-btn save-btn"
 				type="button"
@@ -716,10 +760,6 @@
 			>
 				<i class="bi bi-check2"></i>
 				Save changes
-			</button>
-			<button class="action-btn cancel-btn" type="button" on:click={handleCancel}>
-				<i class="bi bi-x-lg"></i>
-				Cancel
 			</button>
 		{:else}
 			<button
@@ -1115,5 +1155,15 @@
 		font-size: 12px;
 		color: var(--delete-btn, #dc3545);
 		margin: 0;
+	}
+	.text-input.input-error {
+		border-color: var(--error-color);
+	}
+
+	.field-error {
+		font-size: 11px;
+		color: var(--error-color);
+		margin: 4px 0 0;
+		line-height: 1.4;
 	}
 </style>

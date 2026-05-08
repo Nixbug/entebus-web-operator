@@ -880,7 +880,7 @@ export interface paths {
          *                 - Operator can only create services for the company they belong to.
          *                 - Validates that the vehicle, route, and fare belong to the specified company.
          *                 - Status of vehicle must be ACTIVE, company must be VERIFIED, and route must be VALID.
-         *                 - Service can only be created within `1` days before the `starting_at`.
+         *                 - `starting_at` must be between now and `1` days from now.
          *                 - The service name is auto-generated based on the name of the route, vehicle, and starting date.
          *                 - By default the status of the service is set to CREATED.
          */
@@ -929,6 +929,8 @@ export interface paths {
          *                     - STARTED -> ENDED
          *                     - ENDED -> STARTED
          *                 - When status transitions to ENDED, all STARTED duties on the service are ended at the same time.
+         *                 - `vehicle_id`, `route_id`, `fare_id`, and `starting_at` can only be updated when service status is CREATED.
+         *                 - `starting_at` must be between now and `1` days from now.
          *                 - Empty PATCH requests are allowed and will result in no changes.
          */
         patch: operations["update_service_operator_company_service__id__patch"];
@@ -1242,6 +1244,48 @@ export interface components {
             };
         };
         /**
+         * FareInServiceSchema
+         * @description Schema for fare in service response.
+         */
+        FareInServiceSchema: {
+            /** Id */
+            id: number;
+            /** Fare Id */
+            fare_id: number;
+            /** Version */
+            version: number;
+            /** Name */
+            name: string;
+            attributes: components["schemas"]["FareAttributes"];
+            /** Function */
+            function: string;
+        };
+        /**
+         * FareSchema
+         * @description Schema for fare response.
+         */
+        FareSchema: {
+            /** Id */
+            id: number;
+            /** Company Id */
+            company_id: number | null;
+            /** Version */
+            version: number;
+            /** Name */
+            name: string;
+            attributes: components["schemas"]["FareAttributes"];
+            /** Function */
+            function: string;
+            scope: components["schemas"]["FareScope"];
+            /** Updated On */
+            updated_on: string | null;
+            /**
+             * Created On
+             * Format: date-time
+             */
+            created_on: string;
+        };
+        /**
          * FareScope
          * @description Scope of fare applicability.
          * @enum {integer}
@@ -1290,6 +1334,28 @@ export interface components {
              * Format: date-time
              */
             created_on: string;
+        };
+        /**
+         * LandmarkInServiceSchema
+         * @description Schema for landmark in service response.
+         */
+        LandmarkInServiceSchema: {
+            /** Service Id */
+            service_id: number;
+            /** Landmark Id */
+            landmark_id: number;
+            /** Distance From Start */
+            distance_from_start: number;
+            /**
+             * Arrival At
+             * Format: date-time
+             */
+            arrival_at: string;
+            /**
+             * Departure At
+             * Format: date-time
+             */
+            departure_at: string;
         };
         /**
          * LandmarkSchema
@@ -1595,18 +1661,44 @@ export interface components {
              */
             ending_at: string;
             /** Updated On */
+            updated_on?: string | null;
+            /**
+             * Created On
+             * Format: date-time
+             */
+            created_on: string;
+            fare: components["schemas"]["FareInServiceSchema"];
+            vehicle: components["schemas"]["VehicleInServiceSchema"];
+            /** Route */
+            route: components["schemas"]["LandmarkInServiceSchema"][];
+            /** Public Key */
+            public_key: string;
+        };
+        /**
+         * RouteSchema
+         * @description Schema for route response.
+         */
+        RouteSchema: {
+            /** Id */
+            id: number;
+            /** Company Id */
+            company_id: number;
+            /** Name */
+            name: string;
+            /**
+             * Start Time
+             * Format: time
+             */
+            start_time: string;
+            /** Status */
+            status: number;
+            /** Updated On */
             updated_on: string | null;
             /**
              * Created On
              * Format: date-time
              */
             created_on: string;
-            fare: components["schemas"]["app__api__service__FareSchema"];
-            vehicle: components["schemas"]["app__api__service__VehicleSchema"];
-            /** Route */
-            route: components["schemas"]["app__api__service__RouteSchema"][];
-            /** Public Key */
-            public_key: string;
         };
         /**
          * RouteStatus
@@ -1694,7 +1786,7 @@ export interface components {
              */
             ending_at: string;
             /** Updated On */
-            updated_on: string | null;
+            updated_on?: string | null;
             /**
              * Created On
              * Format: date-time
@@ -1857,6 +1949,61 @@ export interface components {
             created_on: string;
         };
         /**
+         * VehicleInServiceSchema
+         * @description Schema for vehicle in service response.
+         */
+        VehicleInServiceSchema: {
+            /** Id */
+            id: number;
+            /** Vehicle Id */
+            vehicle_id: number;
+            /** Version */
+            version: number;
+            /** Registration Number */
+            registration_number: string;
+            /** Name */
+            name: string;
+            /** Capacity */
+            capacity: number;
+        };
+        /**
+         * VehicleSchema
+         * @description Schema for vehicle response.
+         */
+        VehicleSchema: {
+            /** Id */
+            id: number;
+            /** Company Id */
+            company_id: number;
+            /** Registration Number */
+            registration_number: string;
+            /** Name */
+            name: string;
+            /** Capacity */
+            capacity: number;
+            /** Updated On */
+            updated_on: string | null;
+            /**
+             * Created On
+             * Format: date-time
+             */
+            created_on: string;
+            /** Manufactured On */
+            manufactured_on: string | null;
+            /** Insurance Upto */
+            insurance_upto: string | null;
+            /** Pollution Upto */
+            pollution_upto: string | null;
+            /** Fitness Upto */
+            fitness_upto: string | null;
+            /** Road Tax Upto */
+            road_tax_upto: string | null;
+            /** Status */
+            status: number;
+            /** Version */
+            version: number;
+        };
+        /**
          * VehicleStatus
          * @description Operational status of a vehicle.
          * @enum {integer}
@@ -1892,31 +2039,6 @@ export interface components {
             attributes: components["schemas"]["FareAttributes"];
             /** Function */
             function: string;
-        };
-        /**
-         * FareSchema
-         * @description Schema for fare response.
-         */
-        app__api__fare__FareSchema: {
-            /** Id */
-            id: number;
-            /** Company Id */
-            company_id: number | null;
-            /** Version */
-            version: number;
-            /** Name */
-            name: string;
-            attributes: components["schemas"]["FareAttributes"];
-            /** Function */
-            function: string;
-            scope: components["schemas"]["FareScope"];
-            /** Updated On */
-            updated_on: string | null;
-            /**
-             * Created On
-             * Format: date-time
-             */
-            created_on: string;
         };
         /**
          * OrderBy
@@ -2141,32 +2263,6 @@ export interface components {
          */
         app__api__route__OrderBy: "id" | "created_on" | "updated_on";
         /**
-         * RouteSchema
-         * @description Schema for route response.
-         */
-        app__api__route__RouteSchema: {
-            /** Id */
-            id: number;
-            /** Company Id */
-            company_id: number;
-            /** Name */
-            name: string;
-            /**
-             * Start Time
-             * Format: time
-             */
-            start_time: string;
-            /** Status */
-            status: number;
-            /** Updated On */
-            updated_on: string | null;
-            /**
-             * Created On
-             * Format: date-time
-             */
-            created_on: string;
-        };
-        /**
          * UpdateForm
          * @description Form data for updating a route.
          */
@@ -2204,79 +2300,35 @@ export interface components {
             starting_at: string;
         };
         /**
-         * FareSchema
-         * @description Schema for fare response.
-         */
-        app__api__service__FareSchema: {
-            /** Id */
-            id: number;
-            /** Fare Id */
-            fare_id: number;
-            /** Version */
-            version: number;
-            /** Name */
-            name: string;
-            attributes: components["schemas"]["FareAttributes"];
-            /** Function */
-            function: string;
-        };
-        /**
          * OrderBy
          * @description Enum for ordering service results.
          * @enum {string}
          */
         app__api__service__OrderBy: "id" | "created_on" | "updated_on" | "starting_at" | "ending_at";
         /**
-         * RouteSchema
-         * @description Schema for route response.
-         */
-        app__api__service__RouteSchema: {
-            /** Service Id */
-            service_id: number;
-            /** Landmark Id */
-            landmark_id: number;
-            /** Distance From Start */
-            distance_from_start: number;
-            /**
-             * Arrival At
-             * Format: date-time
-             */
-            arrival_at: string;
-            /**
-             * Departure At
-             * Format: date-time
-             */
-            departure_at: string;
-        };
-        /**
          * UpdateForm
          * @description Form data for updating an existing service.
          */
         app__api__service__UpdateForm: {
+            /** Name */
+            name?: string | null;
             /** @description HYBRID: 1, DIGITAL: 2, CONVENTIONAL: 3 */
             ticket_mode?: components["schemas"]["TicketingMode"];
             /** @description CREATED: 1, CACHED: 2, STARTED: 3, ENDED: 4, AUDITED: 5 */
             status?: components["schemas"]["ServiceStatus"];
             /** Remark */
             remark?: string | null;
-        };
-        /**
-         * VehicleSchema
-         * @description Schema for vehicle response.
-         */
-        app__api__service__VehicleSchema: {
-            /** Id */
-            id: number;
             /** Vehicle Id */
-            vehicle_id: number;
-            /** Version */
-            version: number;
-            /** Registration Number */
-            registration_number: string;
-            /** Name */
-            name: string;
-            /** Capacity */
-            capacity: number;
+            vehicle_id?: number;
+            /** Route Id */
+            route_id?: number;
+            /** Fare Id */
+            fare_id?: number;
+            /**
+             * Starting At
+             * Format: date-time
+             */
+            starting_at?: string;
         };
         /**
          * CreateFormForOP
@@ -2351,43 +2403,6 @@ export interface components {
             road_tax_upto?: string | null;
             /** @description CREATED: 1, ACTIVE: 2, MAINTENANCE: 3, SUSPENDED: 4 */
             status?: components["schemas"]["VehicleStatus"];
-        };
-        /**
-         * VehicleSchema
-         * @description Schema for vehicle response.
-         */
-        app__api__vehicle__VehicleSchema: {
-            /** Id */
-            id: number;
-            /** Company Id */
-            company_id: number;
-            /** Registration Number */
-            registration_number: string;
-            /** Name */
-            name: string;
-            /** Capacity */
-            capacity: number;
-            /** Updated On */
-            updated_on: string | null;
-            /**
-             * Created On
-             * Format: date-time
-             */
-            created_on: string;
-            /** Manufactured On */
-            manufactured_on: string | null;
-            /** Insurance Upto */
-            insurance_upto: string | null;
-            /** Pollution Upto */
-            pollution_upto: string | null;
-            /** Fitness Upto */
-            fitness_upto: string | null;
-            /** Road Tax Upto */
-            road_tax_upto: string | null;
-            /** Status */
-            status: number;
-            /** Version */
-            version: number;
         };
         /**
          * OrderBy
@@ -3859,7 +3874,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__api__vehicle__VehicleSchema"][];
+                    "application/json": components["schemas"]["VehicleSchema"][];
                 };
             };
             /** @description Unauthorized */
@@ -3901,7 +3916,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__api__vehicle__VehicleSchema"];
+                    "application/json": components["schemas"]["VehicleSchema"];
                 };
             };
             /** @description Unauthorized */
@@ -4010,7 +4025,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__api__vehicle__VehicleSchema"];
+                    "application/json": components["schemas"]["VehicleSchema"];
                 };
             };
             /** @description Unauthorized */
@@ -4320,7 +4335,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__api__route__RouteSchema"][];
+                    "application/json": components["schemas"]["RouteSchema"][];
                 };
             };
             /** @description Unauthorized */
@@ -4362,7 +4377,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__api__route__RouteSchema"];
+                    "application/json": components["schemas"]["RouteSchema"];
                 };
             };
             /** @description Unauthorized */
@@ -4462,7 +4477,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__api__route__RouteSchema"];
+                    "application/json": components["schemas"]["RouteSchema"];
                 };
             };
             /** @description Unauthorized */
@@ -4788,7 +4803,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__api__fare__FareSchema"][];
+                    "application/json": components["schemas"]["FareSchema"][];
                 };
             };
             /** @description Unauthorized */
@@ -4830,7 +4845,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__api__fare__FareSchema"];
+                    "application/json": components["schemas"]["FareSchema"];
                 };
             };
             /** @description Unauthorized */
@@ -4939,7 +4954,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["app__api__fare__FareSchema"];
+                    "application/json": components["schemas"]["FareSchema"];
                 };
             };
             /** @description Unauthorized */
@@ -5646,6 +5661,15 @@ export interface operations {
             };
             /** @description Not Acceptable */
             406: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            /** @description Precondition Failed */
+            412: {
                 headers: {
                     [name: string]: unknown;
                 };

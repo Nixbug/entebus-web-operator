@@ -327,7 +327,6 @@ export async function loadPermissions(): Promise<void> {
 
 		const merged = validPermissions.reduce((acc, perms) => deepOrMerge(acc, perms));
 		savePermissions(merged);
-		console.log('Loaded permissions:', merged);
 	} catch (err) {
 		console.error('loadPermissions error', err);
 		clearPermissions();
