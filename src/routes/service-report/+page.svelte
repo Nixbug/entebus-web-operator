@@ -347,6 +347,12 @@
 		gap: 1rem;
 		flex-wrap: nowrap;
 		margin-bottom: 1.5rem;
+		position: sticky;
+		top: 64px; /* stays below HeaderBar */
+		z-index: 850;
+		background: var(--bg-primary);
+		padding-top: 0.35rem;
+		padding-bottom: 0.35rem;
 	}
 
 	.page-title-block {
@@ -383,7 +389,9 @@
 	/* Inner table scroll wrapper */
 	.table-scroll {
 		overflow-x: auto;
+		overflow-y: auto;
 		-webkit-overflow-scrolling: touch;
+		max-height: calc(100vh - 220px);
 	}
 
 	/* Nudge FilterOnly down to align its select with date inputs */
