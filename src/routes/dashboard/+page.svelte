@@ -6,7 +6,6 @@
 	let fullname = 'Operator';
 
 	onMount(() => {
-		// Prefer stored full name, fall back to username saved for login
 		const stored =
 			localStorage.getItem('fullname') ||
 			((): string | null => {
@@ -24,6 +23,7 @@
 			if (savedUser) fullname = savedUser;
 		}
 	});
+	//-- Dashboard cards configuration --
 	const dashboardCards = [
 		{
 			title: 'Operator Account',
