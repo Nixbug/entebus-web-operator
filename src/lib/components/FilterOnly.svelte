@@ -16,6 +16,11 @@
 </script>
 
 <div class="filter-only">
+	<!-- Accessibility: the <label for={label}> below will not be associated with the
+	CustomSelect unless `CustomSelect` accepts and forwards an `id` to its
+	interactive element. Use a stable, unique id (e.g. derived from the
+	label or a generated UUID) and pass it as `id` to `CustomSelect`, then
+	use the same value in the label's `for` attribute. -->
 	<label class="filter-label" for={label}>{label}</label>
 	<div>
 		<CustomSelect {label} {options} {value} onChange={(v) => handleChange(v)} />

@@ -17,6 +17,7 @@
 		ServiceRouteStop
 	} from '$lib/types/type';
 	import { handleApiError } from '$lib/utils/api-error';
+	import { canDeleteService, canUpdateService } from '$lib/utils/permissions';
 
 	const dispatch = createEventDispatcher<{ serviceUpdated: void; serviceDeleted: void }>();
 
@@ -146,8 +147,12 @@
 		showTimeline = Array.isArray(timelineRoute) && timelineRoute.length > 0 && timelineFare != null;
 	}
 
-	//-- Handle update: call API then signal parent to re-fetch --
+	//-- Handle update event from ServiceInfoPanel --
 	async function handleInfoUpdate(e: CustomEvent<{ payload: Record<string, any> }>) {
+		if (!canUpdateService()) {
+			toast.error('You are not authorized to update this service.');
+			return;
+		}
 		if (!service) return;
 		try {
 			//-- Only include fields that have actually changed --
@@ -223,6 +228,10 @@
 	}
 
 	async function confirmDelete() {
+		if (!canDeleteService()) {
+			toast.error('You are not authorized to delete this service.');
+			return;
+		}
 		if (!service) return;
 		deleting = true;
 		try {

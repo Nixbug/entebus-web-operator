@@ -3,7 +3,7 @@
 	import DashboardCard from '$lib/components/DashboardCard.svelte';
 	import { onMount } from 'svelte';
 	import { Store } from '$lib/stores/session-store';
-	let fullname = 'John';
+	let fullname = 'Operator';
 
 	onMount(() => {
 		// Prefer stored full name, fall back to username saved for login
