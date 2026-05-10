@@ -1,15 +1,25 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
 	import { applyTheme } from '$lib/theme';
 	import enteBuslogo from '$lib/assets/entebus_logo.png';
 	import { DESKTOP_BREAKPOINT } from '$lib/constants';
 	import { browser } from '$app/environment';
+	import { getToken, logout } from '$lib/services/auth';
+	import { Store } from '$lib/stores/session-store';
+	import { titleCase } from '$lib/helpers';
+	import { fetchOperatorImageForOperator } from '$lib/services/operator-image';
 
 	let dark = false;
-	export let text: string = 'Online';
+	let profileImageUrl: string | null = null;
+	export let text: string = 'Active';
 	let showProfileModal = false;
 	let dropdownOpen = false;
 	let isDesktop = false;
+	let showLogoutConfirm = false;
+	let loggingOut = false;
+	let username = 'Unknown user';
+	let operatorId = '-';
+	let email = '';
 
 	//-- Bind avatar button for focus restoration
 	let avatarBtnEl: HTMLButtonElement | null = null;
@@ -31,6 +41,40 @@
 		dark = saved === 'dark';
 		applyTheme(dark);
 
+		// Prefer full name for display, fall back to stored username
+		const storedFullname =
+			localStorage.getItem('fullname') ||
+			((): string | null => {
+				const s = Store.fetchData<any>('fullname');
+				return typeof s === 'string' && s ? s : null;
+			})();
+		const storedUsername =
+			localStorage.getItem('username') ||
+			((): string | null => {
+				const s = Store.fetchData<any>('username');
+				return typeof s === 'string' && s ? s : null;
+			})();
+		if (storedFullname) username = storedFullname;
+		else if (storedUsername) username = storedUsername;
+
+		const storedEmail =
+			localStorage.getItem('email') ||
+			((): string | null => {
+				const s = Store.fetchData<any>('email');
+				return typeof s === 'string' && s ? s : null;
+			})();
+		if (storedEmail) email = storedEmail;
+		const token = getToken() as Record<string, unknown> | null;
+		if (token && token.operator_id !== undefined && token.operator_id !== null) {
+			operatorId = String(token.operator_id);
+			const numericId = Number(token.operator_id);
+			if (Number.isFinite(numericId) && numericId > 0) {
+				fetchOperatorImageForOperator(numericId, { width: 80, height: 80 })
+					.then((url) => { profileImageUrl = url; })
+					.catch(() => {});
+			}
+		}
+
 		const mql = window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT}px)`);
 		function updateDesktop() {
 			isDesktop = isDesktopScreen();
@@ -39,6 +83,12 @@
 		updateDesktop();
 		mql.addEventListener('change', updateDesktop);
 		return () => mql.removeEventListener('change', updateDesktop);
+	});
+
+	onDestroy(() => {
+		if (browser) {
+			document.body.style.overflow = '';
+		}
 	});
 
 	//-- Profile modal logic for mobile/tablet --
@@ -62,10 +112,28 @@
 		avatarBtnEl?.focus();
 	}
 
-	//-- Logout (Mock) --
-	function handleLogout() {
-		//-- TODO: Implement actual logout logic --
-		alert('Logout clicked');
+	function openLogoutConfirm() {
+		dropdownOpen = false;
+		showProfileModal = false;
+		showLogoutConfirm = true;
+		document.body.style.overflow = 'hidden';
+	}
+
+	function closeLogoutConfirm() {
+		showLogoutConfirm = false;
+		loggingOut = false;
+		document.body.style.overflow = '';
+	}
+
+	//-- Logout with confirmation --
+	async function handleLogout() {
+		if (loggingOut) return;
+		loggingOut = true;
+		try {
+			await logout();
+		} finally {
+			closeLogoutConfirm();
+		}
 	}
 </script>
 
@@ -109,6 +177,7 @@
 					id="avatar-btn"
 					bind:this={avatarBtnEl}
 					type="button"
+					aria-label={username}
 					class="p-0 border-0 bg-transparent rounded-circle"
 					aria-haspopup="true"
 					aria-expanded={dropdownOpen ? 'true' : 'false'}
@@ -121,7 +190,13 @@
 						}
 					}}
 				>
-					<img src="https://i.pravatar.cc/40?u=john" alt="John" class="avatar" />
+					<div class="avatar avatar-icon" role="img" aria-label={username} title={username}>
+						{#if profileImageUrl}
+							<img src={profileImageUrl} alt={username} style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+						{:else}
+							<i class="bi bi-person-fill" aria-hidden="true"></i>
+						{/if}
+					</div>
 				</button>
 
 				{#if dropdownOpen && isDesktop}
@@ -139,19 +214,32 @@
 						}}
 					>
 						<li class="p-3 pb-2 text-center">
-							<img src="https://i.pravatar.cc/64?u=john" alt="John" class="rounded-circle mb-2" />
-							<h6 class="fw-inter-700 mb-0">John Mathew</h6>
-							<p class="small mb-0">opertaor Manager</p>
-							<p class="small mb-0">john@entebus.com</p>
+							<div
+								class="avatar avatar-icon avatar-icon-lg rounded-circle mb-2"
+								role="img"
+								aria-label={username}
+								title={username}
+							>
+								{#if profileImageUrl}
+									<img src={profileImageUrl} alt={username} style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+								{:else}
+									<i class="bi bi-person-circle" aria-hidden="true"></i>
+								{/if}
+							</div>
+							<h6 class="fw-inter-700 mb-0">{titleCase(username)}</h6>
+							<p class="small mb-0">({email})</p>
 						</li>
 						<hr class="my-2" />
 						<li class="px-3 pb-2">
 							<a href="/user-profile" class="btn btn-light w-100 fw-medium border"
 								>Account Settings</a
 							>
+							<a href="/company-profile" class="btn btn-light mt-2 fw-medium w-100 border"
+								>Company Profile</a
+							>
 						</li>
 						<li class="px-3 pb-3">
-							<button class="btn btn-outline-danger w-100 fw-medium" on:click={handleLogout}>
+							<button class="btn btn-outline-danger w-100 fw-medium" on:click={openLogoutConfirm}>
 								Logout
 							</button>
 						</li>
@@ -165,8 +253,16 @@
 					type="button"
 					class="avatar-btn p-0 border-0 bg-transparent"
 					on:click={toggleProfile}
+					aria-label={username}
+					title={username}
 				>
-					<img src="https://i.pravatar.cc/40?u=john" alt="John" class="avatar" />
+					<div class="avatar avatar-icon" role="img" aria-hidden="true">
+						{#if profileImageUrl}
+							<img src={profileImageUrl} alt={username} style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+						{:else}
+							<i class="bi bi-person-fill" aria-hidden="true"></i>
+						{/if}
+					</div>
 				</button>
 				<span
 					class="position-absolute bottom-0 end-0 translate-middle-x online-dot-mobile d-md-none"
@@ -202,24 +298,69 @@
 	>
 		<div class="profile-content rounded-4 shadow p-4" on:click|stopPropagation role="none">
 			<div class="text-center border-bottom pb-3 mb-3">
-				<img
-					src="https://i.pravatar.cc/80?u=john"
-					alt="John"
-					class="rounded-circle mb-3 shadow-sm"
-					width="80"
-					height="80"
-				/>
-				<h6 class="fw-inter-700 mb-1">John Mathew</h6>
-				<p class="small mb-0">opertaor Manager</p>
-				<p class="small mb-0">john@entebus.com</p>
+				<div
+					class="avatar avatar-icon avatar-icon-xxl rounded-circle mb-3 shadow-sm"
+					role="img"
+					aria-label={username}
+					title={username}
+				>
+					{#if profileImageUrl}
+						<img src={profileImageUrl} alt={username} style="width:100%;height:100%;object-fit:cover;border-radius:50%;" />
+					{:else}
+						<i class="bi bi-person-badge-fill" aria-hidden="true"></i>
+					{/if}
+				</div>
+				<h6 class="fw-inter-700 mb-1">{titleCase(username)}</h6>
+				<p class="small mb-0">{email}</p>
 			</div>
 
 			<div class="d-flex flex-column gap-2 mb-3">
 				<a href="/user-profile" class="btn btn-outline-primary fw-medium w-100">Account Settings</a>
-				<button class="btn btn-danger fw-medium w-100" on:click={handleLogout}>Logout</button>
+				<a href="/company-profile" class="btn btn-outline-primary mt-2 fw-medium w-100"
+					>Company Profile</a
+				>
+				<button class="btn btn-danger fw-medium w-100" on:click={openLogoutConfirm}>Logout</button>
 			</div>
 
 			<button class="btn btn-light border w-100" on:click={toggleProfile}>Close</button>
+		</div>
+	</div>
+{/if}
+
+{#if showLogoutConfirm}
+	<div class="logout-confirm-overlay" on:click={closeLogoutConfirm} role="presentation">
+		<div
+			class="logout-confirm-card rounded-4 shadow"
+			on:click|stopPropagation
+			role="dialog"
+			aria-modal="true"
+			aria-labelledby="logout-confirm-title"
+			tabindex="-1"
+			on:keydown={(e) => {
+				if (e.key === 'Escape') {
+					e.preventDefault();
+					closeLogoutConfirm();
+				}
+			}}
+		>
+			<div class="p-4 pb-2">
+				<h5 id="logout-confirm-title" class="mb-2 fw-inter-700">Confirm Logout</h5>
+				<p class="mb-3">Are you sure you want to logout from this account?</p>
+				<div class="logout-user-meta rounded-3 px-3 py-2">
+					<p class="mb-1"><strong>Username:</strong> {username}</p>
+					<p class="mb-0"><strong>Operator ID:</strong> {operatorId}</p>
+				</div>
+			</div>
+			<div class="d-flex gap-2 px-4 pb-4">
+				<button
+					class="btn btn-light border flex-fill"
+					on:click={closeLogoutConfirm}
+					disabled={loggingOut}>Cancel</button
+				>
+				<button class="btn btn-danger flex-fill" on:click={handleLogout} disabled={loggingOut}
+					>{loggingOut ? 'Logging out...' : 'Logout'}</button
+				>
+			</div>
 		</div>
 	</div>
 {/if}
@@ -355,6 +496,31 @@
 		height: 40px;
 		object-fit: cover;
 	}
+	.avatar-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+		border-radius: 50%;
+		color: #fff;
+		background: linear-gradient(135deg, #7c3aed 0%, #06b6d4 100%);
+		box-shadow: 0 6px 16px rgba(2, 6, 23, 0.12);
+		font-size: 18px;
+		border: 2px solid rgba(255, 255, 255, 0.12);
+	}
+
+	.avatar-icon-lg {
+		width: 64px;
+		height: 64px;
+		font-size: 28px;
+	}
+
+	.avatar-icon-xxl {
+		width: 80px;
+		height: 80px;
+		font-size: 34px;
+	}
 
 	.profile-dropdown {
 		position: relative;
@@ -378,6 +544,29 @@
 		color: var(--text-primary, #000);
 		border-radius: 1rem;
 		animation: popIn 0.25s ease-out forwards;
+	}
+
+	.logout-confirm-overlay {
+		position: fixed;
+		inset: 0;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		background: rgba(0, 0, 0, 0.45);
+		backdrop-filter: blur(5px);
+		z-index: 2100;
+		animation: fadeIn 0.2s ease-in;
+	}
+
+	.logout-confirm-card {
+		width: min(92vw, 420px);
+		background: var(--bg-card, #fff);
+		color: var(--text-primary, #000);
+	}
+
+	.logout-user-meta {
+		background: var(--icon-hover-bg);
+		border: 1px solid var(--border, #ddd);
 	}
 
 	@keyframes fadeIn {

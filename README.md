@@ -26,9 +26,9 @@ Designed for **containerized environments** (Docker + Kubernetes), it ensures sc
 
 ### VS Code (plugins)
 
-Svelte for VS Code  
-Prettier  
-ESLint
+- Svelte for VS Code
+- Prettier
+- ESLint
 
 ### Usage
 
@@ -46,6 +46,49 @@ npm run build
 
 # Preview the production build locally
 npm run preview
+```
+
+## 🔧 OpenAPI Client Generation
+
+This project uses OpenAPI Generator to automatically create a TypeScript API client from the backend’s OpenAPI specification.
+
+**Steps to generate API client**
+
+In `package.json`, under the `"scripts"` section — add the OpenAPI package script:
+
+```json
+{
+  ...
+  "scripts": {
+    ...
+    "generate:api": "openapi-typescript https://dev-api.entebus.com/operator/openapi.json -o src/lib/api/types.ts"
+  }
+}
+```
+
+Generate the client library
+
+```bash
+# Run the command below to generate the client:
+npm run generate:api
+# The generated client files are placed inside src/lib/api/
+```
+
+## 🔧 Static Build Configuration
+
+- API base URL is configured using a build-time environment variable
+- Variable name: `PUBLIC_BASE_URL`
+
+For local development, Create a `.env` file in the project root with an example value:
+
+```text
+PUBLIC_BASE_URL=https://api.example.com
+```
+
+Build with a custom URL (WSL / Linux):
+
+```bash
+PUBLIC_BASE_URL=https://api.example.com npm run build
 ```
 
 ## 🐳 Docker Image

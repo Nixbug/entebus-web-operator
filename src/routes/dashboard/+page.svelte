@@ -1,7 +1,29 @@
 <script lang="ts">
 	import HeaderBar from '$lib/components/HeaderBar.svelte';
 	import DashboardCard from '$lib/components/DashboardCard.svelte';
+	import { onMount } from 'svelte';
+	import { Store } from '$lib/stores/session-store';
+	let fullname = 'Operator';
 
+	onMount(() => {
+		const stored =
+			localStorage.getItem('fullname') ||
+			((): string | null => {
+				const s = Store.fetchData<any>('fullname');
+				return typeof s === 'string' && s ? s : null;
+			})();
+		if (stored) fullname = stored;
+		else {
+			const savedUser =
+				localStorage.getItem('username') ||
+				((): string | null => {
+					const s = Store.fetchData<any>('username');
+					return typeof s === 'string' && s ? s : null;
+				})();
+			if (savedUser) fullname = savedUser;
+		}
+	});
+	//-- Dashboard cards configuration --
 	const dashboardCards = [
 		{
 			title: 'Operator Account',
@@ -46,18 +68,11 @@
 			href: '/company-services'
 		},
 		{
-			title: 'Schedules',
-			description: 'Manage schedules',
-			icon: 'bi bi-calendar-event-fill',
-			color: '#10B981',
-			href: '/schedules'
-		},
-		{
-			title: 'Duty',
-			description: 'View and manage duty',
-			icon: 'bi bi-person-workspace',
+			title: 'Reports',
+			description: 'View operational reports',
+			icon: 'bi bi-bar-chart-fill',
 			color: '#3B82F6',
-			href: '/duty'
+			href: '/service-report'
 		}
 	];
 </script>
@@ -72,8 +87,8 @@
 			<section class="dashboard-content">
 				<div class="row">
 					<div class="col-12 col-md-8 col-lg-7 col-xl-6 mt-4 dashboard-header">
-						<h2 class="fw-inter-700">Welcome back, John!</h2>
-						<p>Manage your company dashboard from here.</p>
+						<h2 class="fw-inter-700">Welcome back, {fullname}!</h2>
+						<p>Manage your executive dashboard and business operations from here.</p>
 					</div>
 				</div>
 
