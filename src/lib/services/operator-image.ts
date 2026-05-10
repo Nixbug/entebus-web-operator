@@ -50,16 +50,19 @@ export async function fetchOperatorImageObjectUrl(
 	return URL.createObjectURL(blob);
 }
 
-// -- Simple in-memory cache keyed by operator id
+// -- In-memory cache keyed by "operatorId_width_height" so different callers
+// -- requesting different dimensions don't evict each other's object URLs.
 type OperatorImageCacheEntry = {
 	imageId: number;
 	objectUrl: string;
-	width?: number;
-	height?: number;
 	fetchedAt: number;
 };
 
-const operatorImageCache = new Map<number, OperatorImageCacheEntry>();
+const operatorImageCache = new Map<string, OperatorImageCacheEntry>();
+
+function makeCacheKey(operatorId: number, opts: { width?: number; height?: number }): string {
+	return `${operatorId}_${opts.width ?? ''}_${opts.height ?? ''}`;
+}
 
 /**
  * Fetch an operator's image as an object URL, but reuse a cached copy when the
@@ -105,36 +108,29 @@ export async function fetchOperatorImageForOperator(
 		return null;
 	}
 
-	const cached = operatorImageCache.get(operatorId);
-	if (
-		cached &&
-		cached.imageId === id &&
-		cached.width === opts.width &&
-		cached.height === opts.height &&
-		cached.objectUrl
-	) {
+	const key = makeCacheKey(operatorId, opts);
+	const cached = operatorImageCache.get(key);
+	if (cached && cached.imageId === id && cached.objectUrl) {
 		return cached.objectUrl;
 	}
 
-	// -- revoke old object URL before replacing
+	// -- revoke old object URL for this specific size before replacing
 	if (cached?.objectUrl) URL.revokeObjectURL(cached.objectUrl);
 
 	// -- not cached or changed; download and update cache
 	const objectUrl = await fetchOperatorImageObjectUrl(id, opts);
-	operatorImageCache.set(operatorId, {
-		imageId: id,
-		objectUrl,
-		width: opts.width,
-		height: opts.height,
-		fetchedAt: Date.now()
-	});
+	operatorImageCache.set(key, { imageId: id, objectUrl, fetchedAt: Date.now() });
 	return objectUrl;
 }
 
 function evictCache(operatorId: number) {
-	const cached = operatorImageCache.get(operatorId);
-	if (cached?.objectUrl) URL.revokeObjectURL(cached.objectUrl);
-	operatorImageCache.delete(operatorId);
+	const prefix = `${operatorId}_`;
+	for (const [key, entry] of operatorImageCache.entries()) {
+		if (key.startsWith(prefix)) {
+			URL.revokeObjectURL(entry.objectUrl);
+			operatorImageCache.delete(key);
+		}
+	}
 }
 
 export function clearOperatorImageCache(operatorId?: number) {
