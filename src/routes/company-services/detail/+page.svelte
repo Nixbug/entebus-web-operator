@@ -247,6 +247,8 @@
 					{service}
 					{landmarks}
 					{totalCollection}
+					referrerFromDate={referrerFromDate}
+					referrerToDate={referrerToDate}
 					{loadOperators}
 					{assignOperator}
 					{unassignOperator}

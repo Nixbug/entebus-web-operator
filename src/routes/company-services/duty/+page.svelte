@@ -40,6 +40,10 @@
 	}
 	$: serviceNameFilter = $page.url.searchParams.get('serviceName') ?? undefined;
 
+	//-- Extract referrer date range (from service detail page navigating back from report) --
+	$: referrerFromDate = $page.url.searchParams.get('from_date');
+	$: referrerToDate = $page.url.searchParams.get('to_date');
+
 	//-- Pagination setup --
 	let currentPage = 1;
 	let itemsPerPage = 10;
@@ -289,7 +293,7 @@
 		{ key: 'statusLabel', label: 'Status', isChip: true }
 	];
 	const optionalColumns = [
-		{key:'collection', label:'Collection'},
+		{ key: 'collection', label: 'Collection' },
 		{ key: 'finishedOn', label: 'Finished On' },
 		{ key: 'createdAt', label: 'Created At' },
 		{ key: 'updatedAt', label: 'Updated At' }
@@ -305,9 +309,17 @@
 	}
 
 	//-- Build back navigation URL --
-	$: backHref = serviceIdFilter
-		? `/company-services/detail?id=${serviceIdFilter}`
-		: '/company-services';
+	$: backHref = (() => {
+		if (!serviceIdFilter) return '/company-services';
+		const params = new URLSearchParams();
+		params.set('id', String(serviceIdFilter));
+		if (referrerFromDate) {
+			params.set('from', 'report');
+			params.set('from_date', referrerFromDate);
+		}
+		if (referrerToDate) params.set('to_date', referrerToDate);
+		return `/company-services/detail?${params.toString()}`;
+	})();
 </script>
 
 <!-- LAYOUT -->

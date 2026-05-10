@@ -31,6 +31,8 @@
 	export let service: ServiceDetail | null = null;
 	export let landmarks: Landmark[] = [];
 	export let totalCollection: number | null = null;
+	export let referrerFromDate: string | null = null;
+	export let referrerToDate: string | null = null;
 
 	//-- detail mode: operator assignment API functions --
 	export let loadOperators: (
@@ -267,6 +269,8 @@
 				{service}
 				{landmarks}
 				{totalCollection}
+				{referrerFromDate}
+				{referrerToDate}
 				loadVehicles={loadVehiclesForPanel}
 				loadFares={loadFaresForPanel}
 				on:preview={handlePreview}
