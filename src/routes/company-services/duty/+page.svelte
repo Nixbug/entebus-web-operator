@@ -70,6 +70,8 @@
 		if (serviceIdFilter) params.set('serviceId', String(serviceIdFilter));
 		if (serviceNameFilter) params.set('serviceName', serviceNameFilter);
 		params.set('dutyDisplayId', duty.id);
+		if (referrerFromDate) params.set('from_date', referrerFromDate);
+		if (referrerToDate) params.set('to_date', referrerToDate);
 		goto(`/company-services/duty/paper-ticket?${params.toString()}`);
 	}
 	//-- Valid state transitions — imported from constants (single source of truth shared with duty-detail.config.ts) --
