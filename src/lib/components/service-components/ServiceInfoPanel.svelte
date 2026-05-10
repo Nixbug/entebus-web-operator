@@ -170,6 +170,7 @@
 		origStatus = selectedStatus;
 		origRemark = remark;
 		origDate = startingDate;
+		origTime = startingTime;
 	}
 
 	//-- Watch service changes and re-sync form state --
