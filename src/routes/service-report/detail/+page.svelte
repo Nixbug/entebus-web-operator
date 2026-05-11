@@ -982,7 +982,7 @@
 										</tr>
 									</thead>
 									<tbody>
-										{#each vehicleRows as v, i (v.vehicle_id ?? v.vehicle_name)}
+										{#each vehicleRows as v, i (`${v.vehicle_id ?? 'null'}:${v.registration_number ?? ''}:${v.vehicle_name ?? ''}`)}
 											<tr>
 												<td class="cell-num">{i + 1}</td>
 												<td>
