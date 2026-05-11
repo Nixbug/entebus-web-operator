@@ -227,7 +227,7 @@
 								{/if}
 							</div>
 							<h6 class="fw-inter-700 mb-0">{titleCase(username)}</h6>
-							<p class="small mb-0">({email})</p>
+							<p class="small mb-0">{email}</p>
 						</li>
 						<hr class="my-2" />
 						<li class="px-3 pb-2">
