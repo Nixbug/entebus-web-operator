@@ -234,12 +234,6 @@
 			required: true
 		},
 		{
-			name: 'status',
-			label: 'Status',
-			options: ['Created', 'Active', 'Maintenance', 'Suspended'],
-			placeholder: 'Select status'
-		},
-		{
 			name: 'manufactured_on',
 			label: 'Manufactured On',
 			type: 'date',
@@ -289,11 +283,7 @@
 			insurance_upto: toIsoUtc(formData.insurance_upto),
 			fitness_upto: toIsoUtc(formData.fitness_upto),
 			pollution_upto: toIsoUtc(formData.pollution_upto),
-			road_tax_upto: toIsoUtc(formData.road_tax_upto),
-			status:
-				VEHICLE_STATUS_VALUE_BY_LABEL[formData.status] !== undefined
-					? VEHICLE_STATUS_VALUE_BY_LABEL[formData.status]
-					: VEHICLE_STATUS.CREATED
+			road_tax_upto: toIsoUtc(formData.road_tax_upto)
 		};
 		isSubmitting = true;
 		try {
@@ -402,12 +392,7 @@
 		</div>
 		<main class="container-xl py-5 page-wrapper">
 			<!-- HOME BUTTON -->
-			<HomeButton
-				icon="bi bi-arrow-left"
-				ariaLabel="Back"
-				to="/dashboard"
-				preserveQuery={true}
-			/>
+			<HomeButton icon="bi bi-arrow-left" ariaLabel="Back" to="/dashboard" preserveQuery={true} />
 			<!-- PAGE HEADER -->
 			<ListingPageHeader
 				title="Company Vehicle Management"
