@@ -30,7 +30,6 @@
 	import toast from '$lib/utils/toast';
 	import { onMount } from 'svelte';
 	import {
-		VEHICLE_STATUS,
 		VEHICLE_STATUS_FILTER_OPTIONS,
 		VEHICLE_STATUS_VALUE_BY_LABEL
 	} from '$lib/constants';

@@ -633,15 +633,11 @@
 			//-- Fetch duties for each service in parallel --
 			const dutiesPerService = await Promise.all(serviceIds.map((sid) => fetchAllDuties(sid)));
 			if (req !== reportRequestId) return; // stale
-
-			//-- Optionally fetch missing service details to get vehicle name --
 			const servicesById = new Map<number, any>();
 			if (Array.isArray(services)) for (const s of services) servicesById.set(s.id, s);
 
-			//-- Fetch service details for all selected services to get reliable vehicle data --
-			let detailMap = new Map<number, any>();
+			const detailMap = new Map<number, any>();
 			{
-				// fetch details in limited-size batches to avoid bursting many concurrent requests
 				const BATCH = 8;
 				try {
 					for (let i = 0; i < serviceIds.length; i += BATCH) {
@@ -655,7 +651,6 @@
 								const d = res.value;
 								if (d && d.id != null) detailMap.set(d.id, d);
 							} else {
-								// log the failure so missing data is diagnosable
 								console.warn(`fetchServiceDetail failed for id ${id}:`, res.reason ?? 'no reason');
 							}
 						});
@@ -761,13 +756,20 @@
 				}
 			>();
 			for (const r of builtRows) {
-				// Use the built row's registration_number directly; ReportRow includes this field.
+				//-- Determine a key for grouping vehicles, prioritizing reliable IDs but falling back to registration/name --
 				const vehicleRegistrationNumber = r.registration_number ?? '';
+				//-- Consider values like null, undefined, empty string, or 'N/A' (case-insensitive) as placeholders --
+				const isPlaceholder = (s: string | null | undefined) =>
+					!s || String(s).trim().toUpperCase() === 'N/A';
 
-				const key =
-					r.vehicle_id != null
-						? `id:${r.vehicle_id}`
-						: `fallback:${vehicleRegistrationNumber}|${r.vehicle_name}`;
+				let key: string;
+				if (r.vehicle_id != null) {
+					key = `id:${r.vehicle_id}`;
+				} else if (!isPlaceholder(vehicleRegistrationNumber) || !isPlaceholder(r.vehicle_name)) {
+					key = `fallback:${vehicleRegistrationNumber}|${r.vehicle_name}`;
+				} else {
+					key = `service:${r.id}`;
+				}
 
 				const existing = vMap.get(key);
 				if (existing) {
