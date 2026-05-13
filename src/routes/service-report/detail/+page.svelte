@@ -8,6 +8,8 @@
 	import { handleApiError } from '$lib/utils/api-error';
 	import toast from '$lib/utils/toast';
 	import { SERVICE_STATUS_LABEL_BY_VALUE } from '$lib/constants';
+	import { Store } from '$lib/stores/session-store';
+	import { onMount } from 'svelte';
 	import type { jsPDF as JsPdfDocument } from 'jspdf';
 	import type { RowInput, UserOptions } from 'jspdf-autotable';
 
@@ -52,6 +54,7 @@
 	let loading = true;
 	let generatedAt = '';
 	let downloadingPdf = false;
+	let companyName = 'Operator Service Report';
 
 	//-- Helpers --
 	function statusLabel(status: number): string {
@@ -228,7 +231,7 @@
 		doc.setFont('helvetica', 'normal');
 		doc.setFontSize(9);
 		doc.setTextColor(95, 105, 120);
-		doc.text('Operator Service Report', PDF_MARGIN.left, 54);
+		doc.text(companyName, PDF_MARGIN.left, 54);
 
 		doc.setFontSize(8.5);
 		doc.setTextColor(70, 78, 92);
@@ -831,6 +834,15 @@
 	function handlePrint() {
 		handleDownloadPdf();
 	}
+
+	//-- Fetch company name from storage on mount --
+	onMount(() => {
+		const storedCompanyName =
+			localStorage.getItem('companyName') || Store.fetchData<string>('companyName');
+		if (storedCompanyName) {
+			companyName = storedCompanyName;
+		}
+	});
 </script>
 
 <div class="main-div d-flex flex-column min-vh-100">
@@ -878,7 +890,7 @@
 				<div class="report-header">
 					<div class="report-title-block">
 						<h1 class="report-title">Service Collection Report</h1>
-						<p class="report-subtitle">Operator Service Report</p>
+						<p class="report-subtitle">{companyName}</p>
 					</div>
 					<div class="report-meta">
 						<div class="meta-row">

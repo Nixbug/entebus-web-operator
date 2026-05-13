@@ -200,6 +200,7 @@ function clearToken() {
 		localStorage.removeItem('permissions');
 		localStorage.removeItem('fullname');
 		localStorage.removeItem('email');
+		localStorage.removeItem('companyName');
 	} catch {}
 	try {
 		Store.clearData('token');
@@ -207,6 +208,7 @@ function clearToken() {
 		Store.clearData('permissions');
 		Store.clearData('fullname');
 		Store.clearData('email');
+		Store.clearData('companyName');
 	} catch {}
 }
 

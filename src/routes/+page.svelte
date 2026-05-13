@@ -174,6 +174,15 @@
 			storeToken(token, rememberMe);
 			scheduleTokenRefresh(token);
 			await loadPermissions();
+			//-- Store company information --
+			if (selectedCompany) {
+				localStorage.setItem('companyName', selectedCompany);
+				Store.storeData<string>('companyName', selectedCompany);
+			}
+			if (selectedCompanyId) {
+				localStorage.setItem('selectedCompanyId', String(selectedCompanyId));
+				Store.storeData<number>('selectedCompanyId', selectedCompanyId);
+			}
 			try {
 				const operatorId = token?.operator_id ?? getToken()?.operator_id;
 				if (operatorId) {
@@ -210,6 +219,19 @@
 				await loadPermissions();
 				const token = getToken();
 				if (token) scheduleTokenRefresh(token);
+				//-- Restore company information from storage if available --
+				const storedCompanyName =
+					localStorage.getItem('companyName') || Store.fetchData<string>('companyName');
+				const storedCompanyId =
+					localStorage.getItem('selectedCompanyId') ||
+					String(Store.fetchData<number>('selectedCompanyId'));
+				if (storedCompanyName) {
+					companyName = storedCompanyName;
+					selectedCompany = storedCompanyName;
+				}
+				if (storedCompanyId) {
+					selectedCompanyId = parseInt(storedCompanyId, 10);
+				}
 				try {
 					const operatorId = token?.operator_id;
 					if (operatorId) {
