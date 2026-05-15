@@ -125,6 +125,7 @@
 
 			selectedTicket = {
 				id: raw.id,
+				ticketSequenceId: raw.ticket?.id,
 				serviceId: raw.service_id,
 				dutyId: raw.duty_id,
 				companyId: raw.company_id,
@@ -198,7 +199,7 @@
 			}
 
 			ticketRows = rawTickets.map((t: any) => ({
-				id: `TKT-${t.id}`,
+				id: `T-${t.service_id}-${t.ticket?.id ?? t.id}`,
 				apiId: t.id,
 				amount: `₹${t.amount}`,
 				pickupPoint:
@@ -294,12 +295,12 @@
 				buttonLabel=""
 			/>
 
-			<SearchFilterBar
+			<!-- <SearchFilterBar
 				showFilter={false}
 				{activeFilters}
 				searchPlaceholder="Search by ticket ID..."
 				on:update={handleFilterUpdate}
-			/>
+			/> -->
 
 			<!-- Table (Desktop) -->
 			<div class="d-none d-md-block">
