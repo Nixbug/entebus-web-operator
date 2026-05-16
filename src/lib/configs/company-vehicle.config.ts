@@ -9,8 +9,9 @@ import {
 	clearVehicleImageCache
 } from '$lib/services/vehicle-image';
 export function getVehicleDetailConfig(data: Vehicle): DetailConfig {
-	//-- Disable editing if vehicle is in Created or Suspended state --
-	const isEditDisabled = ['Created', 'Suspended'].includes(data.status);
+	//-- Status can only transition between Active <-> Maintenance per API rules --
+	const statusEditable = data.status === 'Active' || data.status === 'Maintenance';
+	const statusTransitionOptions = statusEditable ? ['Active', 'Maintenance'] : [];
 
 	return {
 		title: 'Vehicle Details',
@@ -93,7 +94,7 @@ export function getVehicleDetailConfig(data: Vehicle): DetailConfig {
 						label: 'NAME',
 						value: data.name,
 						type: 'text',
-						editable: !isEditDisabled,
+						editable: true,
 						icon: 'bi bi-truck',
 						iconColor: '#16a34a',
 						iconBg: 'rgba(22, 163, 74, 0.15)',
@@ -104,7 +105,7 @@ export function getVehicleDetailConfig(data: Vehicle): DetailConfig {
 						label: 'CAPACITY',
 						value: data.capacity,
 						type: 'number',
-						editable: !isEditDisabled,
+						editable: true,
 						icon: 'bi bi-person-arms-up',
 						iconColor: '#f97316',
 						iconBg: 'rgba(249, 115, 22, 0.15)'
@@ -114,18 +115,18 @@ export function getVehicleDetailConfig(data: Vehicle): DetailConfig {
 						label: 'STATUS',
 						value: data.status,
 						type: 'select',
-						editable: !isEditDisabled,
+						editable: statusEditable,
 						icon: 'bi bi-toggle-on',
 						iconColor: '#db2777',
 						iconBg: 'rgba(219, 39, 119, 0.18)',
-						options: ['Active', 'Maintenance']
+						options: statusTransitionOptions
 					},
 					{
 						key: 'manufactured_on',
 						label: 'MANUFACTURED ON',
 						value: data.manufactured_on,
 						type: 'date',
-						editable: !isEditDisabled,
+						editable: true,
 						icon: 'bi bi-calendar-check',
 						iconColor: '#6366f1',
 						iconBg: 'rgba(99, 102, 241, 0.15)'
@@ -135,7 +136,7 @@ export function getVehicleDetailConfig(data: Vehicle): DetailConfig {
 						label: 'INSURANCE UPTO',
 						value: data.insurance_upto || null,
 						type: 'date',
-						editable: !isEditDisabled,
+						editable: true,
 						icon: 'bi bi-calendar-check',
 						iconColor: '#6366f1',
 						iconBg: 'rgba(99, 102, 241, 0.15)'
@@ -145,7 +146,7 @@ export function getVehicleDetailConfig(data: Vehicle): DetailConfig {
 						label: 'FITNESS UPTO',
 						value: data.fitness_upto || null,
 						type: 'date',
-						editable: !isEditDisabled,
+						editable: true,
 						icon: 'bi bi-calendar-check',
 						iconColor: '#6366f1',
 						iconBg: 'rgba(99, 102, 241, 0.15)'
@@ -155,7 +156,7 @@ export function getVehicleDetailConfig(data: Vehicle): DetailConfig {
 						label: 'POLLUTION UPTO',
 						value: data.pollution_upto || null,
 						type: 'date',
-						editable: !isEditDisabled,
+						editable: true,
 						icon: 'bi bi-calendar-check',
 						iconColor: '#6366f1',
 						iconBg: 'rgba(99, 102, 241, 0.15)'
@@ -165,7 +166,7 @@ export function getVehicleDetailConfig(data: Vehicle): DetailConfig {
 						label: 'ROAD TAX UPTO',
 						value: data.road_tax_upto || null,
 						type: 'date',
-						editable: !isEditDisabled,
+						editable: true,
 						icon: 'bi bi-calendar-check',
 						iconColor: '#6366f1',
 						iconBg: 'rgba(99, 102, 241, 0.15)'
