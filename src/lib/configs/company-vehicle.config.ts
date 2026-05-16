@@ -10,13 +10,8 @@ import {
 } from '$lib/services/vehicle-image';
 export function getVehicleDetailConfig(data: Vehicle): DetailConfig {
 	//-- Status can only transition between Active <-> Maintenance per API rules --
-	const statusTransitionOptions =
-		data.status === 'Active'
-			? ['Active', 'Maintenance']
-			: data.status === 'Maintenance'
-				? ['Active', 'Maintenance']
-				: [];
 	const statusEditable = data.status === 'Active' || data.status === 'Maintenance';
+	const statusTransitionOptions = statusEditable ? ['Active', 'Maintenance'] : [];
 
 	return {
 		title: 'Vehicle Details',
