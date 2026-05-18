@@ -218,7 +218,7 @@
 		</div>
 		<main class="container-xl py-5 page-wrapper">
 			<!-- HOME BUTTON -->
-			<HomeButton icon="bi bi-arrow-left" ariaLabel="Back" to="/dashboard" preserveQuery={true} />
+			<HomeButton icon="bi bi-arrow-left" ariaLabel="Back" to="/dashboard" preserveQuery={false} />
 			<!-- PAGE HEADER -->
 			<ListingPageHeader
 				title="Service Management"

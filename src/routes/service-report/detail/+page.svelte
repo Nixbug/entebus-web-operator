@@ -828,7 +828,11 @@
 	// loadReport is triggered reactively when `serviceIds` changes.
 
 	function handleBack() {
-		goto('/service-report');
+		const params = new URLSearchParams();
+		if (fromDate) params.set('from', fromDate);
+		if (toDate) params.set('to', toDate);
+		const qs = params.toString();
+		goto(`/service-report${qs ? `?${qs}` : ''}`);
 	}
 
 	function handlePrint() {

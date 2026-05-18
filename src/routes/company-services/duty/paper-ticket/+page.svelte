@@ -2,7 +2,6 @@
 	import HeaderBar from '$lib/components/HeaderBar.svelte';
 	import HomeButton from '$lib/components/HomeButton.svelte';
 	import ListingPageHeader from '$lib/components/ListingPageHeader.svelte';
-	import SearchFilterBar from '$lib/components/SearchFilterBar.svelte';
 	import DataTable from '$lib/components/ListingTable.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
 	import EmptyData from '$lib/components/EmptyData.svelte';
@@ -82,7 +81,10 @@
 	//-- Build detail ticket object for modal --
 	async function openTicketDetail(row: TicketRow) {
 		const raw = rawTickets.find((t) => t.id === row.apiId);
-		if (!raw) return;
+		if (!raw) {
+			toast.error('Ticket not found');
+			return;
+		}
 		const currentModalRequestId = ++modalRequestId;
 		modalLoading = true;
 		showModal = true;
@@ -104,10 +106,13 @@
 							}
 						}
 					}
-				} catch {
+				} catch (err) {
+					console.warn('Failed to load service/fare details:', err);
 					//-- Fall back to ID-based labels if service/fare fetch fails --
 				}
 			}
+
+			if (currentModalRequestId !== modalRequestId) return;
 
 			//-- Resolve pickup/dropping point names --
 			const pointIds: number[] = [raw.ticket?.pickup_point, raw.ticket?.dropping_point].filter(
@@ -115,12 +120,18 @@
 			);
 			const missingPointIds = pointIds.filter((id) => !landmarkNameMap.has(id));
 			if (missingPointIds.length > 0) {
-				const lmResult = await fetchLandmarkList({ id_list: missingPointIds });
-				const updated = new Map(landmarkNameMap);
-				for (const lm of lmResult as any[]) {
-					if (lm.id != null) updated.set(lm.id, lm.name ?? `Landmark #${lm.id}`);
+				try {
+					const lmResult = await fetchLandmarkList({ id_list: missingPointIds });
+					if (currentModalRequestId !== modalRequestId) return;
+					const updated = new Map(landmarkNameMap);
+					for (const lm of lmResult as any[]) {
+						if (lm.id != null) updated.set(lm.id, lm.name ?? `Landmark #${lm.id}`);
+					}
+					landmarkNameMap = updated;
+				} catch (err) {
+					console.warn('Failed to load landmark names:', err);
+					//-- Fall back to landmark IDs if fetch fails --
 				}
-				landmarkNameMap = updated;
 			}
 
 			if (currentModalRequestId !== modalRequestId) return;
@@ -131,9 +142,9 @@
 				serviceId: raw.service_id,
 				dutyId: raw.duty_id,
 				companyId: raw.company_id,
-				amount: raw.amount,
+				amount: String(raw.amount ?? 0),
 				createdOn: raw.created_on,
-				distance: raw.ticket?.distance ?? 0,
+				distance: Number(raw.ticket?.distance ?? 0),
 				pickupPointName:
 					raw.ticket?.pickup_point != null
 						? (landmarkNameMap.get(raw.ticket.pickup_point) ??
@@ -147,15 +158,17 @@
 				ticketTypes: (raw.ticket?.ticket_types ?? []).map((tt: any) => ({
 					id: tt.id,
 					count: tt.count,
-					price: tt.price,
+					price: String(tt.price ?? 0),
 					//-- Use service-specific fare ticket type name, fallback to ID --
 					ticketTypeName: ticketSpecificFareMap.get(String(tt.id)) ?? `Type #${tt.id}`
 				}))
 			};
 		} catch (err) {
 			console.error('Failed to resolve ticket details:', err);
-			toast.error('Failed to load ticket details.');
-			showModal = false;
+			if (currentModalRequestId === modalRequestId) {
+				toast.error('Failed to load ticket details.');
+				showModal = false;
+			}
 		} finally {
 			if (currentModalRequestId === modalRequestId) modalLoading = false;
 		}
