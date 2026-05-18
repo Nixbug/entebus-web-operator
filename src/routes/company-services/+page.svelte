@@ -194,7 +194,12 @@
 	//-- Navigation to service detail page --
 	function handleShowDetailPage(service: Service) {
 		if (!service?.apiId) return;
-		goto(`/company-services/detail?id=${service.apiId}&from_date=${fromDate}&to_date=${toDate}`);
+		const query = new URLSearchParams({
+			id: String(service.apiId),
+			from_date: String(fromDate),
+			to_date: String(toDate)
+		});
+		goto(`/company-services/detail?${query.toString()}`);
 	}
 </script>
 
@@ -234,7 +239,10 @@
 						fromDate = dates.from;
 						toDate = dates.to;
 						currentPage = 1;
-						goto(`?from=${dates.from}&to=${dates.to}`, {
+						const params = new URLSearchParams();
+						params.set('from', dates.from);
+						params.set('to', dates.to);
+						goto(`?${params.toString()}`, {
 							replaceState: true,
 							noScroll: true,
 							keepFocus: true
