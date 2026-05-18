@@ -36,6 +36,13 @@
 		const qs = params.toString();
 		return `/service-report${qs ? `?${qs}` : ''}`;
 	})();
+	$: backToServicesUrl = (() => {
+		const params = new URLSearchParams();
+		if (referrerFromDate) params.set('from', String(referrerFromDate));
+		if (referrerToDate) params.set('to', String(referrerToDate));
+		const qs = params.toString();
+		return `/company-services${qs ? `?${qs}` : ''}`;
+	})();
 	//-- Map raw snake_case API response → camelCase ServiceDetail --
 	function mapService(raw: any): ServiceDetail {
 		return {
@@ -220,7 +227,7 @@
 			<HomeButton
 				icon="bi bi-arrow-left"
 				ariaLabel={referrer === 'report' ? 'Back to service report' : 'Back to services'}
-				to={referrer === 'report' ? backToReportUrl : '/company-services'}
+				to={referrer === 'report' ? backToReportUrl : backToServicesUrl}
 			/>
 
 			<ListingPageHeader
@@ -247,8 +254,9 @@
 					{service}
 					{landmarks}
 					{totalCollection}
-					referrerFromDate={referrerFromDate}
-					referrerToDate={referrerToDate}
+					{referrer}
+					{referrerFromDate}
+					{referrerToDate}
 					{loadOperators}
 					{assignOperator}
 					{unassignOperator}

@@ -28,6 +28,7 @@
 		$page.url.searchParams.get('dutyDisplayId') ?? (dutyId ? `DUTY-${dutyId}` : '');
 	$: serviceIdParam = $page.url.searchParams.get('serviceId');
 	$: serviceNameParam = $page.url.searchParams.get('serviceName');
+	$: referrer = $page.url.searchParams.get('referrer');
 	$: referrerFromDate = $page.url.searchParams.get('from_date');
 	$: referrerToDate = $page.url.searchParams.get('to_date');
 
@@ -36,6 +37,7 @@
 		const params = new URLSearchParams();
 		if (serviceIdParam) params.set('serviceId', serviceIdParam);
 		if (serviceNameParam) params.set('serviceName', serviceNameParam);
+		if (referrer) params.set('referrer', referrer);
 		if (referrerFromDate) params.set('from_date', referrerFromDate);
 		if (referrerToDate) params.set('to_date', referrerToDate);
 		return `/company-services/duty?${params.toString()}`;
