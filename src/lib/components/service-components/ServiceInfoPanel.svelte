@@ -25,6 +25,7 @@
 	//-- Props --
 	export let service: ServiceDetail;
 	export let landmarks: Landmark[] = [];
+	export let referrer: string | null = null;
 	export let referrerFromDate: string | null = null;
 	export let referrerToDate: string | null = null;
 	
@@ -491,6 +492,7 @@
 		const params = new URLSearchParams();
 		params.set('serviceId', String(service.id));
 		params.set('serviceName', service.name);
+		if (referrer) params.set('referrer', referrer);
 		if (referrerFromDate) params.set('from_date', referrerFromDate);
 		if (referrerToDate) params.set('to_date', referrerToDate);
 		goto(`/company-services/duty?${params.toString()}`);

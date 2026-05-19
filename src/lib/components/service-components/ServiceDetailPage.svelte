@@ -31,6 +31,7 @@
 	export let service: ServiceDetail | null = null;
 	export let landmarks: Landmark[] = [];
 	export let totalCollection: number | null = null;
+	export let referrer: string | null = null;
 	export let referrerFromDate: string | null = null;
 	export let referrerToDate: string | null = null;
 
@@ -269,6 +270,7 @@
 				{service}
 				{landmarks}
 				{totalCollection}
+				{referrer}
 				{referrerFromDate}
 				{referrerToDate}
 				loadVehicles={loadVehiclesForPanel}

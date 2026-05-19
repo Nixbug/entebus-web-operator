@@ -40,7 +40,8 @@
 	}
 	$: serviceNameFilter = $page.url.searchParams.get('serviceName') ?? undefined;
 
-	//-- Extract referrer date range (from service detail page navigating back from report) --
+	//-- Extract referrer type and date range (passed through from service detail) --
+	$: referrer = $page.url.searchParams.get('referrer');
 	$: referrerFromDate = $page.url.searchParams.get('from_date');
 	$: referrerToDate = $page.url.searchParams.get('to_date');
 
@@ -70,6 +71,7 @@
 		if (serviceIdFilter) params.set('serviceId', String(serviceIdFilter));
 		if (serviceNameFilter) params.set('serviceName', serviceNameFilter);
 		params.set('dutyDisplayId', duty.id);
+		if (referrer) params.set('referrer', referrer);
 		if (referrerFromDate) params.set('from_date', referrerFromDate);
 		if (referrerToDate) params.set('to_date', referrerToDate);
 		goto(`/company-services/duty/paper-ticket?${params.toString()}`);
@@ -315,10 +317,8 @@
 		if (!serviceIdFilter) return '/company-services';
 		const params = new URLSearchParams();
 		params.set('id', String(serviceIdFilter));
-		if (referrerFromDate) {
-			params.set('from', 'report');
-			params.set('from_date', referrerFromDate);
-		}
+		if (referrer) params.set('from', referrer);
+		if (referrerFromDate) params.set('from_date', referrerFromDate);
 		if (referrerToDate) params.set('to_date', referrerToDate);
 		return `/company-services/detail?${params.toString()}`;
 	})();
@@ -380,7 +380,7 @@
 						</div>
 						<span
 							class="badge rounded-pill"
-							style="background-color: var(--edit-btn); color: var(--text-primary);"
+							style="background-color: var(--bg-primary); color: var(--text-primary);"
 						>
 							{duty.statusLabel}
 						</span>

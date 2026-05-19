@@ -17,6 +17,8 @@
 	import type { Service } from '$lib/types/type';
 	import EmptyData from '$lib/components/EmptyData.svelte';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { get } from 'svelte/store';
 	import { fetchServiceList } from '$lib/services/company-services';
 	import { handleApiError } from '$lib/utils/api-error';
 	import toast from '$lib/utils/toast';
@@ -45,9 +47,10 @@
 		return new Date(`${date}T23:59:59+05:30`).toISOString();
 	}
 
-	//-- Date range state — default: today --
-	let fromDate = todayIst();
-	let toDate = todayIst();
+	//-- Date range state — restored from URL params or default: today --
+	const _urlParams = get(page).url.searchParams;
+	let fromDate = _urlParams.get('from') ?? todayIst();
+	let toDate = _urlParams.get('to') ?? todayIst();
 
 	//-- Pagination setup --
 	let currentPage = 1;
@@ -191,7 +194,12 @@
 	//-- Navigation to service detail page --
 	function handleShowDetailPage(service: Service) {
 		if (!service?.apiId) return;
-		goto(`/company-services/detail?id=${service.apiId}`);
+		const query = new URLSearchParams({
+			id: String(service.apiId),
+			from_date: String(fromDate),
+			to_date: String(toDate)
+		});
+		goto(`/company-services/detail?${query.toString()}`);
 	}
 </script>
 
@@ -210,7 +218,7 @@
 		</div>
 		<main class="container-xl py-5 page-wrapper">
 			<!-- HOME BUTTON -->
-			<HomeButton icon="bi bi-arrow-left" ariaLabel="Back" to="/dashboard" preserveQuery={true} />
+			<HomeButton icon="bi bi-arrow-left" ariaLabel="Back" to="/dashboard" preserveQuery={false} />
 			<!-- PAGE HEADER -->
 			<ListingPageHeader
 				title="Service Management"
@@ -231,6 +239,14 @@
 						fromDate = dates.from;
 						toDate = dates.to;
 						currentPage = 1;
+						const params = new URLSearchParams();
+						params.set('from', dates.from);
+						params.set('to', dates.to);
+						goto(`?${params.toString()}`, {
+							replaceState: true,
+							noScroll: true,
+							keepFocus: true
+						});
 						fetchServices();
 					}}
 				/>

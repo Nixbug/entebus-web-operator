@@ -11,6 +11,7 @@
 		SERVICE_STATUS_VALUE_BY_LABEL
 	} from '$lib/constants';
 	import { page } from '$app/stores';
+	import { get } from 'svelte/store';
 	import FilterOnly from '$lib/components/FilterOnly.svelte';
 	import DateFilterComponent from '$lib/components/DateFilterComponent.svelte';
 	import { utcToIstRelativeFormat } from '$lib/helpers';
@@ -32,23 +33,10 @@
 		return new Date(`${date}T23:59:59+05:30`).toISOString();
 	}
 
-	//-- Date range state — default: today --
-	let fromDate = todayIst();
-	let toDate = todayIst();
-
-	// Initialize date range from URL query params when the page first loads.
-	// Preserve user edits: only override when the current values are the
-	// defaults (today). Validate that `fromDate <= toDate` and clamp if needed.
-	$: {
-		const pFrom = $page.url.searchParams.get('from');
-		const pTo = $page.url.searchParams.get('to');
-		if (pFrom && fromDate === todayIst()) fromDate = pFrom;
-		if (pTo && toDate === todayIst()) toDate = pTo;
-		if (pFrom && pTo && pFrom > pTo) {
-			// If the query params are out-of-order, clamp `toDate` to `fromDate`.
-			toDate = fromDate;
-		}
-	}
+	//-- Date range state — restored from URL params or default: today --
+	const _urlParams = get(page).url.searchParams;
+	let fromDate = _urlParams.get('from') ?? todayIst();
+	let toDate = _urlParams.get('to') ?? todayIst();
 
 	//-- Service list state --
 	let services: any[] = [];
@@ -212,6 +200,14 @@
 						onChange={(dates) => {
 							fromDate = dates.from;
 							toDate = dates.to;
+							const params = new URLSearchParams();
+							params.set('from', dates.from);
+							params.set('to', dates.to);
+							goto(`?${params.toString()}`, {
+								replaceState: true,
+								noScroll: true,
+								keepFocus: true
+							});
 						}}
 					/>
 				</div>
