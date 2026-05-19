@@ -188,7 +188,10 @@
 
 	//-- Navigation to service creation --
 	function handleAddService() {
-		goto(`/company-services/create`);
+		const params = new URLSearchParams();
+		params.set('from', fromDate);
+		params.set('to', toDate);
+		goto(`/company-services/create?${params.toString()}`);
 	}
 
 	//-- Navigation to service detail page --
