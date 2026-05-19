@@ -28,7 +28,7 @@
 	export let referrer: string | null = null;
 	export let referrerFromDate: string | null = null;
 	export let referrerToDate: string | null = null;
-	
+
 	export let loadVehicles:
 		| ((
 				q?: string,
@@ -558,7 +558,9 @@
 				placeholder="Search vehicles…"
 				loadOptions={loadVehicles ?? (() => Promise.resolve([]))}
 				value={selectedVehicleId}
-				initialLabel={service.vehicle.name}
+				initialLabel={service.vehicle.registrationNumber
+					? `${service.vehicle.name}(${service.vehicle.registrationNumber})`
+					: service.vehicle.name}
 				disabled={!isCreatedStatus}
 				disabledMessage="Not allowed - only services in Created status can change vehicle"
 				onChange={(v) => {
