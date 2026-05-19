@@ -90,7 +90,7 @@
 				<div class="row">
 					<div class="col-12 col-md-8 col-lg-7 col-xl-6 mt-4 dashboard-header">
 						<h2 class="fw-inter-700">Welcome back, {fullname}!</h2>
-						<p>Manage your executive dashboard and business operations from here.</p>
+						<p>Manage your company dashboard and business operations from here.</p>
 					</div>
 				</div>
 

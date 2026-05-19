@@ -13,13 +13,18 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { canCreateService } from '$lib/utils/permissions';
-	let companyId: string | null = null;
-	$: companyId = null; // Operator app doesn't use company context
-	$: parsedCompanyId = undefined;
-	$: validCompanyId = undefined;
+
+	let listingHref = `/company-services`;
 
 	//-- preserve original listing query params so we return to the same filtered listing --
-	$: listingHref = `/company-services`;
+	$: {
+		const params = new URLSearchParams();
+		const fromDate = $page.url.searchParams.get('from');
+		const toDate = $page.url.searchParams.get('to');
+		if (fromDate) params.set('from', fromDate);
+		if (toDate) params.set('to', toDate);
+		listingHref = `/company-services${params.toString() ? `?${params.toString()}` : ''}`;
+	}
 
 	let isSubmitting = false;
 
@@ -81,7 +86,12 @@
 				status: 2
 			});
 			if (!Array.isArray(result)) return [];
-			return result.map((v: any) => ({ id: Number(v.id || v.apiId), name: String(v.name) }));
+			return result.map((v: any) => {
+				const vehicleName = String(v.name);
+				const regNumber = v.registration_number ? String(v.registration_number).trim() : '';
+				const displayName = regNumber ? `${vehicleName}(${regNumber})` : vehicleName;
+				return { id: Number(v.id || v.apiId), name: displayName };
+			});
 		} catch {
 			return [];
 		}
