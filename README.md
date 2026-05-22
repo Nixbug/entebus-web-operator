@@ -1,34 +1,34 @@
-# 🚍 Entebus web executive
+# 🚍 Entebus web operator
 
 [![Svelte](https://img.shields.io/badge/Svelte-‡-FF3E00?logo=svelte&logoColor=white)](https://svelte.dev/)
 [![Bootstrap](https://img.shields.io/badge/Bootstrap-5+-7952B3?logo=bootstrap&logoColor=white)](https://getbootstrap.com/)
 [![Docker](https://img.shields.io/badge/Docker-ready-0db7ed?logo=docker)](https://www.docker.com/)
 [![Kubernetes](https://img.shields.io/badge/Kubernetes-ready-326ce5?logo=kubernetes)](https://kubernetes.io/)
 
-The **Entebus web executive** is a high-performance web application with [Svelte](https://svelte.dev/).
+The **Entebus web operator** is a high-performance web application with [Svelte](https://svelte.dev/).
 Designed for **containerized environments** (Docker + Kubernetes), it ensures scalability, resilience, and modern developer experience.
 
 ## ✨ Features
+
 ⚡ **High-performance** with Svelte  
 🅱️ **Bootstrap support** for additional styles  
 🐳 Ready-to-use **Docker image** with CI-friendly tags  
-☸️ Deployment ready for **Kubernetes**  
+☸️ Deployment ready for **Kubernetes**
 
 ## 🛠️ Getting Started
 
 ### Prerequisites
 
-- Node.js (v18+)  
-- npm (v9+)  
-- Docker   
-- Kubernetes (optional for deployment)  
-
+- Node.js (v18+)
+- npm (v9+)
+- Docker
+- Kubernetes (optional for deployment)
 
 ### VS Code (plugins)
 
-Svelte for VS Code  
-Prettier    
-ESLint  
+- Svelte for VS Code
+- Prettier
+- ESLint
 
 ### Usage
 
@@ -48,31 +48,75 @@ npm run build
 npm run preview
 ```
 
+## 🔧 OpenAPI Client Generation
+
+This project uses OpenAPI Generator to automatically create a TypeScript API client from the backend’s OpenAPI specification.
+
+**Steps to generate API client**
+
+In `package.json`, under the `"scripts"` section — add the OpenAPI package script:
+
+```json
+{
+  ...
+  "scripts": {
+    ...
+    "generate:api": "openapi-typescript https://dev-api.entebus.com/operator/openapi.json -o src/lib/api/types.ts"
+  }
+}
+```
+
+Generate the client library
+
+```bash
+# Run the command below to generate the client:
+npm run generate:api
+# The generated client files are placed inside src/lib/api/
+```
+
+## 🔧 Static Build Configuration
+
+- API base URL is configured using a build-time environment variable
+- Variable name: `PUBLIC_BASE_URL`
+
+For local development, Create a `.env` file in the project root with an example value:
+
+```text
+PUBLIC_BASE_URL=https://api.example.com
+```
+
+Build with a custom URL (WSL / Linux):
+
+```bash
+PUBLIC_BASE_URL=https://api.example.com npm run build
+```
+
 ## 🐳 Docker Image
 
 **Docker Image**
 
 Build, run, and push the image:
 The image is tagged using the format: <branch-name>-<commit-id> (for latest image you may add optional tag <branch-name>-latest).
-bash
+
 # Building the docker image
-```
-docker build -t <registry>/<namespace>/entebus-web-executive:<branch>-<commit-id> \
-             -t <registry>/<namespace>entebus-web-executive:<branch>-latest .
+
+```bash
+docker build -t <registry>/<namespace>/entebus-web-operator:<branch>-<commit-id> \
+             -t <registry>/<namespace>/entebus-web-operator:<branch>-latest .
 
 # Running the docker image
 docker run -d --name <container-name> -p <host-port>:<container-port> \
-    <registry>/<namespace>/entebus-web-executive:<branch>-latest
+    <registry>/<namespace>/entebus-web-operator:<branch>-latest
 
 # Login to remote docker repository (only needed once)
 docker login <registry>
 
 # Push the docker image to nexus repository
-docker push <registry>/<namespace>/entebus-web-executive:<branch>-latest
-docker push <registry>/<namespace>/entebus-web-executive:<branch>-<commit-id>
+docker push <registry>/<namespace>/entebus-web-operator:<branch>-latest
+docker push <registry>/<namespace>/entebus-web-operator:<branch>-<commit-id>
 
 # Pull the docker image from nexus repository
-docker pull <registry>/<namespace>/entebus-web-executive:<branch>-<commit-id>
+docker pull <registry>/<namespace>/entebus-web-operator:<branch>-<commit-id>
 ```
 
 ## 🤝 Contributing
